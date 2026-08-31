@@ -1,0 +1,58 @@
+export const mockExpenses = [
+  {
+    id: 1,
+    date: "19/08/2026",
+    supplier: "Total Energies",
+    category: "Fuel",
+    amount: "₦45,000",
+  },
+  {
+    id: 2,
+    date: "18/08/2026",
+    supplier: "ShopRite",
+    category: "Groceries",
+    amount: "₦32,500",
+  },
+  {
+    id: 3,
+    date: "17/08/2026",
+    supplier: "MTN Nigeria",
+    category: "Utilities",
+    amount: "₦15,000",
+  },
+  {
+    id: 4,
+    date: "16/08/2026",
+    supplier: "Uber",
+    category: "Transport",
+    amount: "₦8,200",
+  },
+  {
+    id: 5,
+    date: "15/08/2026",
+    supplier: "The Place Restaurant",
+    category: "Food & Dining",
+    amount: "₦22,000",
+  },
+  {
+    id: 6,
+    date: "14/08/2026",
+    supplier: "Chicken Republic",
+    category: "Food & Dining",
+    amount: "₦6,800",
+  },
+  {
+    id: 7,
+    date: "13/08/2026",
+    supplier: "Shell",
+    category: "Fuel",
+    amount: "₦40,000",
+  },
+  {
+    id: 8,
+    date: "12/08/2026",
+    supplier: "Jumia",
+    category: "Shopping",
+    amount: "₦28,900",
+  },
+];
