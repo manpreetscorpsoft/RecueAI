@@ -1,4 +1,5 @@
 import logo from "../../assets/logo.png";
+import recuai from "../../assets/recuai.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -154,12 +155,16 @@ function Sidebar({
     >
       {/* Logo */}
 
-      <div className="flex h-[100px] items-center px-4">
+      <div className="flex h-[100px] items-center px-4 gap-3 mt-4">
         <img
-          src={logo}
+          src={recuai}
           alt="Ivory Nexus Solutions"
           className="max-h-[84px] w-auto object-contain"
         />
+        <p className="text-[24px] font-semibold text-[#d4ad3f]">
+ RecuAi
+        </p>
+       
       </div>
 
       {/* Navigation */}

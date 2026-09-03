@@ -1,4 +1,5 @@
 import logo from "../../assets/logo.png";
+import recuai from "../../assets/recuai.png";
 import { useTranslation } from "react-i18next";
 
 function Header({
@@ -28,9 +29,10 @@ function Header({
         "
       >
         <img
-          src={logo}
+          src={recuai}
           alt="Ivory Nexus Solutions"
           className="w-[110px] object-contain"
+        
         />
 
         <button

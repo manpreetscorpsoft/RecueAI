@@ -1,4 +1,5 @@
 import logo from "../assets/logo.png";
+import recuai from "../assets/recuai.png";
 import { useTranslation } from "react-i18next";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -494,9 +495,9 @@ function LoginPage() {
       >
         {/* Logo */}
 
-        <div className="flex justify-center">
+        <div className="flex flex items-center gap-3 justify-center">
           <img
-            src={logo}
+            src={recuai}
             alt="Ivory Nexus Solutions"
             className="
               w-[140px]
@@ -507,6 +508,9 @@ function LoginPage() {
               [@media(max-height:800px)]:w-[125px]
             "
           />
+       <span className="text-[32px] font-semibold text-[#d4ad3f]">
+    RecuAi
+  </span>
         </div>
 
         {/* Heading */}
