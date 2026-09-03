@@ -5,25 +5,46 @@ export async function getUserExpenses(userId) {
     throw new Error("User ID is required");
   }
 
+  console.log("Loading expenses for user:", userId);
+
   const { data, error } = await supabase.rpc("svc_get_user_expenses", {
-    p_user_id: userId,
+    p_user_id: Number(userId),
   });
+
+  console.log("Full expense RPC response:", data);
+  console.log("Expense RPC error:", error);
+
   if (error) {
     console.error("Get user expenses error:", error);
     throw error;
   }
 
-  if (!Array.isArray(data)) {
+  // svc_get_user_expenses returns:
+  // {
+  //   success: true,
+  //   user_id: ...,
+  //   expenses: [...]
+  // }
+
+  const expenses = Array.isArray(data) ? data : data?.expenses || [];
+
+  console.log("Expenses array:", expenses);
+
+  if (!Array.isArray(expenses)) {
+    console.error("Expenses response is not an array:", expenses);
+
     return [];
   }
 
-  return data.map((expense) => ({
+  return expenses.map((expense) => ({
     id: expense.e_id,
 
     date: formatExpenseDate(expense.purchase_date),
+
     purchaseDate: expense.purchase_date,
 
     supplier: expense.supplier || "-",
+
     category: expense.category || "-",
 
     amount: formatExpenseAmount(expense.amount_fcfa, expense.currency_sign),
@@ -31,15 +52,19 @@ export async function getUserExpenses(userId) {
     rawAmount: expense.amount_fcfa,
 
     currency: expense.currency || "",
+
     currencySign: expense.currency_sign || "",
 
     description: expense.description || "",
 
     receiptUrl: expense.receipt_url || null,
+
     receiptDriveId: expense.receipt_drive_id || null,
+
     receiptItemId: expense.receipt_item_id || null,
 
     groupId: expense.group_id,
+
     userId: expense.user_id,
   }));
 }
@@ -113,10 +138,30 @@ export async function deleteExpense(expenseId) {
     p_expense_id: expenseId,
   });
 
+  console.log("Delete expense response:", data);
+  console.log("Delete expense error:", error);
+
   if (error) {
-    console.error("Delete expense error:", error);
+    console.error("Delete expense RPC error:", error);
     throw error;
   }
 
+  if (!data || data.success !== true) {
+    throw new Error("Expense was not deleted");
+  }
+
   return data;
+}
+
+export async function logoutUser() {
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    console.error("Logout error:", error);
+    throw error;
+  }
+
+  return {
+    success: true,
+  };
 }

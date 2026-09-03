@@ -2,7 +2,10 @@ import logo from "../../assets/logo.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-function Sidebar({ role = "admin" }) {
+function Sidebar({
+  role = "admin",
+  onLogout,
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -204,6 +207,7 @@ function Sidebar({ role = "admin" }) {
         {/* Logout */}
         <button
           type="button"
+          onClick={onLogout}
           className="
             flex
             h-[46px]

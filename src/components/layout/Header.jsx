@@ -1,7 +1,11 @@
 import logo from "../../assets/logo.png";
 import { useTranslation } from "react-i18next";
 
-function Header({ role = "admin", phone = "+234 812 345 6789" }) {
+function Header({
+  role = "admin",
+  phone = "+234 812 345 6789",
+  onLogout,
+}) {
   const { t } = useTranslation();
   const displayRole = role === "admin" ? t("roles.admin") : t("roles.member");
 
@@ -31,6 +35,7 @@ function Header({ role = "admin", phone = "+234 812 345 6789" }) {
 
         <button
           type="button"
+          onClick={onLogout}
           className="
             flex
             items-center
