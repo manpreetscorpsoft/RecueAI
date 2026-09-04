@@ -6,7 +6,9 @@ import { useTranslation } from "react-i18next";
 
 function GroupPage() {
   const { t } = useTranslation();
-  const userId = 274;
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const userId = storedUser.user_id;
   const [groupData, setGroupData] = useState(null);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);

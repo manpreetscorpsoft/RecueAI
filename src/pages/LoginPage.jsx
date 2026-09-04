@@ -20,17 +20,9 @@ function LoginPage() {
 
   const [countryCode, setCountryCode] = useState("+225");
 
-  const [otpBoxes, setOtpBoxes] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+  const [otpBoxes, setOtpBoxes] = useState(["", "", "", "", "", ""]);
 
-  const [focusedOtpIndex, setFocusedOtpIndex] =
-    useState(null);
+  const [focusedOtpIndex, setFocusedOtpIndex] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -125,9 +117,7 @@ function LoginPage() {
 
   const handleOtpChange = (index, value) => {
     // Allow numbers only
-    const cleanValue = value
-      .replace(/\D/g, "")
-      .slice(0, 1);
+    const cleanValue = value.replace(/\D/g, "").slice(0, 1);
 
     const updatedOtp = [...otpBoxes];
 
@@ -136,10 +126,7 @@ function LoginPage() {
     setOtpBoxes(updatedOtp);
 
     // Automatically move to next OTP box
-    if (
-      cleanValue &&
-      index < otpBoxes.length - 1
-    ) {
+    if (cleanValue && index < otpBoxes.length - 1) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -149,11 +136,7 @@ function LoginPage() {
   // =====================================================
 
   const handleOtpKeyDown = (index, event) => {
-    if (
-      event.key === "Backspace" &&
-      !otpBoxes[index] &&
-      index > 0
-    ) {
+    if (event.key === "Backspace" && !otpBoxes[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
   };
@@ -189,13 +172,11 @@ function LoginPage() {
     // 3. BUILD FULL PHONE NUMBER
     // =====================================================
 
-    const countryDigits =
-      countryCode.replace(/\D/g, "");
+    const countryDigits = countryCode.replace(/\D/g, "");
 
-    const fullPhone =
-      cleanPhone.startsWith(countryDigits)
-        ? `+${cleanPhone}`
-        : `${countryCode}${cleanPhone}`;
+    const fullPhone = cleanPhone.startsWith(countryDigits)
+      ? `+${cleanPhone}`
+      : `${countryCode}${cleanPhone}`;
 
     console.log("Full phone:", fullPhone);
 
@@ -206,85 +187,52 @@ function LoginPage() {
       // 4. VERIFY USER USING svc_verify_login
       // =====================================================
 
-      const {
-        data: verifyData,
-        error: verifyError,
-      } = await supabase.rpc(
+      const { data: verifyData, error: verifyError } = await supabase.rpc(
         "svc_verify_login",
         {
           p_phone: fullPhone,
           p_password: password,
-        }
+        },
       );
 
-      console.log(
-        "Verify response:",
-        verifyData
-      );
+      console.log("Verify response:", verifyData);
 
-      console.log(
-        "Verify error:",
-        verifyError
-      );
+      console.log("Verify error:", verifyError);
 
       // =====================================================
       // 5. CHECK VERIFICATION ERROR
       // =====================================================
 
       if (verifyError) {
-        console.error(
-          "svc_verify_login error:",
-          verifyError
-        );
+        console.error("svc_verify_login error:", verifyError);
 
-        if (
-          verifyError.message?.includes(
-            "Invalid phone number or password"
-          )
-        ) {
-          alert(
-            "Invalid phone number or password."
-          );
+        if (verifyError.message?.includes("Invalid phone number or password")) {
+          alert("Invalid phone number or password.");
           return;
         }
 
         if (
           verifyError.message?.includes(
-            "Authentication account is not configured"
+            "Authentication account is not configured",
           )
         ) {
-          alert(
-            "Authentication account is not configured."
-          );
+          alert("Authentication account is not configured.");
+          return;
+        }
+
+        if (verifyError.message?.includes("Authentication account not found")) {
+          alert("Authentication account not found.");
           return;
         }
 
         if (
-          verifyError.message?.includes(
-            "Authentication account not found"
-          )
+          verifyError.message?.includes("Authentication account phone mismatch")
         ) {
-          alert(
-            "Authentication account not found."
-          );
+          alert("Authentication account phone mismatch.");
           return;
         }
 
-        if (
-          verifyError.message?.includes(
-            "Authentication account phone mismatch"
-          )
-        ) {
-          alert(
-            "Authentication account phone mismatch."
-          );
-          return;
-        }
-
-        alert(
-          verifyError.message ||
-            "Unable to verify login."
-        );
+        alert(verifyError.message || "Unable to verify login.");
 
         return;
       }
@@ -298,55 +246,36 @@ function LoginPage() {
         verifyData.success !== true ||
         verifyData.login_verified !== true
       ) {
-        alert(
-          "Login verification failed."
-        );
+        alert("Login verification failed.");
         return;
       }
 
-      console.log(
-        "User verification successful:",
-        verifyData
-      );
+      console.log("User verification successful:", verifyData);
 
       // =====================================================
       // 7. CREATE SUPABASE AUTH SESSION
       // THIS GENERATES THE JWT
       // =====================================================
 
-      const {
-        data: authData,
-        error: authError,
-      } =
-        await supabase.auth.signInWithPassword(
-          {
-            phone: fullPhone,
-            password: password,
-          }
-        );
+      const { data: authData, error: authError } =
+        await supabase.auth.signInWithPassword({
+          phone: fullPhone,
+          password: password,
+        });
 
-      console.log(
-        "Supabase Auth response:",
-        authData
-      );
+      console.log("Supabase Auth response:", authData);
 
-      console.log(
-        "Supabase Auth error:",
-        authError
-      );
+      console.log("Supabase Auth error:", authError);
 
       // =====================================================
       // 8. CHECK AUTH ERROR
       // =====================================================
 
       if (authError) {
-        console.error(
-          "Supabase Auth error:",
-          authError
-        );
+        console.error("Supabase Auth error:", authError);
 
         alert(
-          "Authentication failed. Please check your phone number and password."
+          "Authentication failed. Please check your phone number and password.",
         );
 
         return;
@@ -357,13 +286,9 @@ function LoginPage() {
       // =====================================================
 
       if (!authData?.session) {
-        console.error(
-          "No authentication session returned."
-        );
+        console.error("No authentication session returned.");
 
-        alert(
-          "Authentication session could not be created."
-        );
+        alert("Authentication session could not be created.");
 
         return;
       }
@@ -372,21 +297,13 @@ function LoginPage() {
       // 10. JWT
       // =====================================================
 
-      const accessToken =
-        authData.session.access_token;
+      const accessToken = authData.session.access_token;
 
-      const refreshToken =
-        authData.session.refresh_token;
+      const refreshToken = authData.session.refresh_token;
 
-      console.log(
-        "JWT generated:",
-        !!accessToken
-      );
+      console.log("JWT generated:", !!accessToken);
 
-      console.log(
-        "Refresh token generated:",
-        !!refreshToken
-      );
+      console.log("Refresh token generated:", !!refreshToken);
 
       // Do NOT log actual JWT in production
       // console.log("JWT:", accessToken);
@@ -397,73 +314,72 @@ function LoginPage() {
 
       if (
         verifyData.auth_user_id &&
-        authData.user?.id !==
-          verifyData.auth_user_id
+        authData.user?.id !== verifyData.auth_user_id
       ) {
-        console.error(
-          "Authentication user ID mismatch"
-        );
+        console.error("Authentication user ID mismatch");
 
         await supabase.auth.signOut();
 
-        alert(
-          "Authentication account mismatch."
-        );
+        alert("Authentication account mismatch.");
 
         return;
       }
 
       // =====================================================
-      // 12. SAVE USER INFORMATION
+      // 12. GET DYNAMIC USER ID
+      // =====================================================
+
+      const userId = verifyData.user_id;
+
+      if (!userId) {
+        console.error("User ID was not returned from svc_verify_login.");
+
+        await supabase.auth.signOut();
+
+        alert("User account could not be identified.");
+
+        return;
+      }
+
+      console.log("Dynamic logged-in user ID:", userId);
+
+      // =====================================================
+      // 13. SAVE USER INFORMATION
       // =====================================================
 
       localStorage.setItem(
         "user",
         JSON.stringify({
-          user_id:
-            verifyData.user_id,
+          user_id: userId,
 
-          auth_user_id:
-            verifyData.auth_user_id,
+          auth_user_id: verifyData.auth_user_id,
 
-          phone:
-            verifyData.phone,
+          phone: verifyData.phone,
 
-          language:
-            verifyData.language,
+          language: verifyData.language,
 
-          plan_id:
-            verifyData.plan_id,
+          plan_id: verifyData.plan_id,
 
-          default_currency:
-            verifyData.default_currency,
-        })
+          default_currency: verifyData.default_currency,
+        }),
       );
 
       // Supabase automatically stores/manages
       // the authentication session and JWT.
 
-      console.log(
-        "Login successful:",
-        verifyData
-      );
+      console.log("Login successful:", verifyData);
 
       // =====================================================
-      // 13. REDIRECT
+      // 14. REDIRECT
       // =====================================================
 
       navigate("/dashboard", {
         replace: true,
       });
     } catch (error) {
-      console.error(
-        "Unexpected login error:",
-        error
-      );
+      console.error("Unexpected login error:", error);
 
-      alert(
-        "Something went wrong. Please try again."
-      );
+      alert("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -508,9 +424,10 @@ function LoginPage() {
               [@media(max-height:800px)]:w-[125px]
             "
           />
-       <span className="text-[32px] font-semibold text-[#d4ad3f]">
-    RecuAi
-  </span>
+
+          <span className="text-[32px] font-semibold text-[#d4ad3f]">
+            RecuAi
+          </span>
         </div>
 
         {/* Heading */}
@@ -556,9 +473,7 @@ function LoginPage() {
               [@media(max-height:800px)]:leading-[19px]
             "
           >
-            {t(
-              "auth.loginDescription"
-            )}
+            {t("auth.loginDescription")}
           </p>
         </div>
 
@@ -622,11 +537,7 @@ function LoginPage() {
 
             <select
               value={countryCode}
-              onChange={(e) =>
-                setCountryCode(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setCountryCode(e.target.value)}
               className="
                 shrink-0
                 cursor-pointer
@@ -637,34 +548,22 @@ function LoginPage() {
                 outline-none
               "
             >
-              {countryCodes.map(
-                (country) => (
-                  <option
-                    key={
-                      country.code
-                    }
-                    value={
-                      country.code
-                    }
-                    className="bg-[#171c23] text-white"
-                  >
-                    {country.code}
-                  </option>
-                )
-              )}
+              {countryCodes.map((country) => (
+                <option
+                  key={country.code}
+                  value={country.code}
+                  className="bg-[#171c23] text-white"
+                >
+                  {country.code}
+                </option>
+              ))}
             </select>
 
             <input
               type="tel"
               value={phone}
-              onChange={(e) =>
-                setPhone(
-                  e.target.value
-                )
-              }
-              placeholder={t(
-                "auth.phonePlaceholder"
-              )}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder={t("auth.phonePlaceholder")}
               className="
                 ml-3
                 min-w-0
@@ -740,60 +639,23 @@ function LoginPage() {
           </label>
 
           <div className="grid grid-cols-6 gap-2.5 sm:gap-3">
-            {otpBoxes.map(
-              (value, index) => (
-                <input
-                  key={index}
-
-                  ref={(element) => {
-                    otpRefs.current[
-                      index
-                    ] = element;
-                  }}
-
-                  type="text"
-
-                  inputMode="numeric"
-
-                  autoComplete="one-time-code"
-
-                  maxLength="1"
-
-                  value={value}
-
-                  onChange={(e) =>
-                    handleOtpChange(
-                      index,
-                      e.target.value
-                    )
-                  }
-
-                  onKeyDown={(e) =>
-                    handleOtpKeyDown(
-                      index,
-                      e
-                    )
-                  }
-
-                  onFocus={() =>
-                    setFocusedOtpIndex(
-                      index
-                    )
-                  }
-
-                  onBlur={() =>
-                    setFocusedOtpIndex(
-                      null
-                    )
-                  }
-
-                  placeholder={
-                    index > 3
-                      ? "-"
-                      : ""
-                  }
-
-                  className={`
+            {otpBoxes.map((value, index) => (
+              <input
+                key={index}
+                ref={(element) => {
+                  otpRefs.current[index] = element;
+                }}
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength="1"
+                value={value}
+                onChange={(e) => handleOtpChange(index, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                onFocus={() => setFocusedOtpIndex(index)}
+                onBlur={() => setFocusedOtpIndex(null)}
+                placeholder={index > 3 ? "-" : ""}
+                className={`
                     h-[52px]
                     min-w-0
                     rounded-[8px]
@@ -810,15 +672,13 @@ function LoginPage() {
                     [@media(max-height:800px)]:h-[46px]
 
                     ${
-                      focusedOtpIndex ===
-                      index
+                      focusedOtpIndex === index
                         ? "border-2 border-[#d5af42]"
                         : "border border-[#292f38]"
                     }
                   `}
-                />
-              )
-            )}
+              />
+            ))}
           </div>
         </div>
 
@@ -844,9 +704,7 @@ function LoginPage() {
             [@media(max-height:800px)]:h-[48px]
           "
         >
-          {isLoading
-            ? "Verifying..."
-            : t("auth.verify")}
+          {isLoading ? "Verifying..." : t("auth.verify")}
         </button>
 
         {/* Security Message */}
@@ -870,13 +728,7 @@ function LoginPage() {
             stroke="currentColor"
             strokeWidth="1.8"
           >
-            <rect
-              x="5"
-              y="10"
-              width="14"
-              height="10"
-              rx="2"
-            />
+            <rect x="5" y="10" width="14" height="10" rx="2" />
 
             <path d="M8 10V7a4 4 0 0 1 8 0v3" />
           </svg>
@@ -902,14 +754,8 @@ function LoginPage() {
 
         <p className="text-center text-[13px] text-[#96999e] sm:text-[14px]">
           {t("auth.noAccount")}{" "}
-
-          <button
-            type="button"
-            className="font-semibold text-[#d5af42]"
-          >
-            {t(
-              "auth.createAccount"
-            )}
+          <button type="button" className="font-semibold text-[#d5af42]">
+            {t("auth.createAccount")}
           </button>
         </p>
       </section>

@@ -16,7 +16,9 @@ import { applyUserLanguage } from "../../i18n/i18n";
 import { useTranslation } from "react-i18next";
 function ExpensesPage() {
   const { t } = useTranslation();
-  const userId = 274;
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const userId = storedUser.user_id;
 
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
