@@ -9,7 +9,7 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<LoginPage />} />
 
@@ -20,8 +20,8 @@ function AppRoutes() {
         <Route path="/account" element={<AccountPage />} />
 
         <Route path="/group" element={<GroupPage />} />
-        
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

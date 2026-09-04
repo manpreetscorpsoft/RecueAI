@@ -8,7 +8,11 @@ function Header({
   onLogout,
 }) {
   const { t } = useTranslation();
-  const displayRole = role === "admin" ? t("roles.admin") : t("roles.member");
+
+  const displayRole =
+    role === "admin"
+      ? t("roles.admin")
+      : t("roles.member");
 
   return (
     <>
@@ -18,32 +22,50 @@ function Header({
       <header
         className="
           flex
-          h-[76px]
+          h-[72px]
+          w-full
           items-center
           justify-between
           border-b
           border-[#3b3525]
           bg-[#0c1016]
           px-4
+          sm:px-5
           lg:hidden
         "
       >
-        <img
-          src={recuai}
-          alt="Ivory Nexus Solutions"
-          className="w-[110px] object-contain"
-        
-        />
+        {/* Logo */}
+        <div className="flex min-w-0 shrink-0 items-center">
+          <img
+            src={recuai}
+            alt="RecuAi"
+            className="
+              h-[42px]
+              w-auto
+              max-w-[135px]
+              shrink-0
+              object-contain
 
+              sm:h-[46px]
+              sm:max-w-[150px]
+            "
+          />
+        </div>
+
+        {/* Logout */}
         <button
           type="button"
           onClick={onLogout}
           className="
+            ml-3
             flex
+            shrink-0
             items-center
             gap-1.5
-            text-[14px]
+            text-[13px]
             text-[#a4a5a8]
+
+            sm:text-[14px]
           "
         >
           <span>{t("navigation.logout")}</span>
@@ -51,7 +73,7 @@ function Header({
           <svg
             viewBox="0 0 24 24"
             fill="none"
-            className="h-[18px] w-[18px]"
+            className="h-[18px] w-[18px] shrink-0"
             stroke="currentColor"
             strokeWidth="1.8"
           >
@@ -77,20 +99,32 @@ function Header({
           hidden
           h-[72px]
           w-full
+          min-w-0
           items-center
           justify-between
           border-b
           border-[#3b3525]
           bg-[#0e1319]
-          px-10
+          px-6
           lg:flex
+          xl:px-10
         "
       >
         {/* Greeting */}
-        <div>
-          <p className="text-[13px] text-[#92959a]">{t("auth.welcomeBack")},</p>
+        <div className="min-w-0">
+          <p className="text-[13px] text-[#92959a]">
+            {t("auth.welcomeBack")},
+          </p>
 
-          <h2 className="mt-0.5 text-[16px] font-semibold text-[#f5f0e8]">
+          <h2
+            className="
+              mt-0.5
+              truncate
+              text-[16px]
+              font-semibold
+              text-[#f5f0e8]
+            "
+          >
             {displayRole}
           </h2>
         </div>
@@ -99,16 +133,21 @@ function Header({
         <button
           type="button"
           className="
+            ml-4
             flex
             h-[40px]
+            max-w-full
+            shrink-0
             items-center
             gap-2
             rounded-full
             border
             border-[#3b3525]
             bg-[#171c22]
-            px-4
+            px-3
             text-[#f5f0e8]
+
+            xl:px-4
           "
         >
           {/* WhatsApp Circle */}
@@ -117,6 +156,7 @@ function Header({
               flex
               h-6
               w-6
+              shrink-0
               items-center
               justify-center
               rounded-full
@@ -139,12 +179,32 @@ function Header({
             </svg>
           </span>
 
-          <span className="text-[13px] font-medium">{phone}</span>
+          <span
+            className="
+              max-w-[150px]
+              truncate
+              text-[12px]
+              font-medium
+
+              xl:max-w-none
+              xl:text-[13px]
+            "
+          >
+            {phone}
+          </span>
 
           <svg
             viewBox="0 0 24 24"
             fill="none"
-            className="h-4 w-4 text-[#8f9297]"
+            className="
+              hidden
+              h-4
+              w-4
+              shrink-0
+              text-[#8f9297]
+
+              xl:block
+            "
             stroke="currentColor"
             strokeWidth="2"
           >
