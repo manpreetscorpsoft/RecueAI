@@ -1,4 +1,3 @@
-import logo from "../../assets/logo.png";
 import recuai from "../../assets/recuai.png";
 import { useTranslation } from "react-i18next";
 
@@ -34,22 +33,26 @@ function Header({
           lg:hidden
         "
       >
-        {/* Logo */}
-        <div className="flex min-w-0 shrink-0 items-center">
+        {/* Logo and wordmark */}
+        <div className="flex min-w-0 shrink-0 items-center gap-2">
           <img
             src={recuai}
-            alt="RecuAi"
+            alt="Ivory Nexus Solutions"
             className="
               h-[42px]
               w-auto
-              max-w-[135px]
+              max-w-[100px]
               shrink-0
               object-contain
 
               sm:h-[46px]
-              sm:max-w-[150px]
+              sm:max-w-[110px]
             "
           />
+
+          <span className="shrink-0 text-[20px] font-semibold text-[#d4ad3f] sm:text-[22px]">
+            RecuAi
+          </span>
         </div>
 
         {/* Logout */}

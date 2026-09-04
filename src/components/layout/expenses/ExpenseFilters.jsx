@@ -97,7 +97,7 @@ function ExpenseFilters({
               onChange={(value) => updateFilter("category", value)}
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
               <DateField
                 value={filters.fromDate}
                 onChange={(value) => updateFilter("fromDate", value)}
@@ -268,28 +268,58 @@ function DateField({ value, onChange, label }) {
   const { t } = useTranslation();
   const labelKey =
     label === "From Date" ? "filters.fromDate" : "filters.toDate";
+
   return (
-    <div className="relative">
-      <input
-        type="date"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        aria-label={t(labelKey)}
-        className="
-        date-filter-input
-          h-[44px]
-          w-full
-          rounded-[8px]
-          border
-          border-[#3a3f45]
-          bg-[#171c22]
-          px-4
-          text-[12px]
-          text-[#999ca1]
-          outline-none
-        "
-      />
-    </div>
+    <label className="block min-w-0">
+      <span className="mb-1.5 block text-[11px] font-medium text-[#999ca1] lg:hidden">
+        {t(labelKey)}
+      </span>
+
+      <div className="relative min-w-0">
+        <input
+          type="date"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          aria-label={t(labelKey)}
+          className="
+            date-filter-input
+            h-[44px]
+            min-w-0
+            w-full
+            rounded-[8px]
+            border
+            border-[#3a3f45]
+            bg-[#171c22]
+            px-3
+            text-[12px]
+            text-[#999ca1]
+            outline-none
+            sm:px-4
+          "
+        />
+
+        {!value && (
+          <span
+            aria-hidden="true"
+            className="
+              pointer-events-none
+              absolute
+              inset-y-px
+              left-3
+              right-10
+              flex
+              items-center
+              bg-[#171c22]
+              text-[12px]
+              text-[#777b81]
+              lg:hidden
+            "
+          >
+            DD/MM/YYYY
+          </span>
+        )}
+      </div>
+    </label>
   );
 }
 

@@ -1,11 +1,11 @@
-import logo from "../assets/logo.png";
 import recuai from "../assets/recuai.png";
 import { useTranslation } from "react-i18next";
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Use the same Supabase client used in your other API functions
 import { supabase } from "../lib/supabase";
+import CreateAccountModal from "../components/auth/CreateAccountModal";
 
 function LoginPage() {
   const { t } = useTranslation();
@@ -15,6 +15,7 @@ function LoginPage() {
   // =====================================================
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [phone, setPhone] = useState("");
 
@@ -25,6 +26,8 @@ function LoginPage() {
   const [focusedOtpIndex, setFocusedOtpIndex] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
 
   const otpRefs = useRef([]);
 
@@ -141,6 +144,14 @@ function LoginPage() {
     }
   };
 
+  const openWhatsAppGroup = (language) => {
+    const joinCode = language === "fr" ? "JOINFR" : "JOINEN";
+    const whatsappUrl = "https://wa.me/2250711097879?text=" + joinCode;
+
+    setIsCreateAccountOpen(false);
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  };
+
   // =====================================================
   // VERIFY LOGIN
   // =====================================================
@@ -206,8 +217,12 @@ function LoginPage() {
       if (verifyError) {
         console.error("svc_verify_login error:", verifyError);
 
-        if (verifyError.message?.includes("Invalid phone number or password")) {
-          alert("Invalid phone number or password.");
+        if (
+          verifyError.message?.includes("Invalid phone number or password") ||
+          verifyError.message?.includes("User not found") ||
+          verifyError.message?.includes("No account found")
+        ) {
+          setIsCreateAccountOpen(true);
           return;
         }
 
@@ -221,7 +236,7 @@ function LoginPage() {
         }
 
         if (verifyError.message?.includes("Authentication account not found")) {
-          alert("Authentication account not found.");
+          setIsCreateAccountOpen(true);
           return;
         }
 
@@ -246,6 +261,16 @@ function LoginPage() {
         verifyData.success !== true ||
         verifyData.login_verified !== true
       ) {
+        const userDoesNotExist =
+          verifyData?.user_exists === false ||
+          verifyData?.account_exists === false ||
+          verifyData?.reason === "user_not_found";
+
+        if (userDoesNotExist) {
+          setIsCreateAccountOpen(true);
+          return;
+        }
+
         alert("Login verification failed.");
         return;
       }
@@ -373,7 +398,13 @@ function LoginPage() {
       // 14. REDIRECT
       // =====================================================
 
-      navigate("/dashboard", {
+      const returnTo = location.state?.returnTo;
+      const destination =
+        typeof returnTo === "string" && returnTo.startsWith("/")
+          ? returnTo
+          : "/dashboard";
+
+      navigate(destination, {
         replace: true,
       });
     } catch (error) {
@@ -754,11 +785,23 @@ function LoginPage() {
 
         <p className="text-center text-[13px] text-[#96999e] sm:text-[14px]">
           {t("auth.noAccount")}{" "}
-          <button type="button" className="font-semibold text-[#d5af42]">
+          <button
+            type="button"
+            onClick={() => setIsCreateAccountOpen(true)}
+            className="font-semibold text-[#d5af42]"
+          >
             {t("auth.createAccount")}
           </button>
         </p>
       </section>
+
+      {isCreateAccountOpen && (
+        <CreateAccountModal
+          onClose={() => setIsCreateAccountOpen(false)}
+          onEnglish={() => openWhatsAppGroup("en")}
+          onFrench={() => openWhatsAppGroup("fr")}
+        />
+      )}
     </main>
   );
 }
