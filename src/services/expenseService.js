@@ -226,6 +226,8 @@ export async function logoutUser() {
     throw error;
   }
 
+  localStorage.removeItem("user");
+
   return {
     success: true,
   };
