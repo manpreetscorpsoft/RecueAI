@@ -3,13 +3,22 @@ import recuai from "../../assets/recuai.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-function Sidebar({
-  role = "admin",
-  onLogout,
-}) {
+function Sidebar({ role = "admin", onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+
+  /* =========================================================
+     GET USER PLAN
+  ========================================================= */
+
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const planId = Number(storedUser.plan_id ?? storedUser.planId ?? 0);
+
+  /* =========================================================
+     MENU ITEMS
+  ========================================================= */
 
   const menuItems = [
     {
@@ -26,6 +35,7 @@ function Sidebar({
             stroke="currentColor"
             strokeWidth="1.8"
           />
+
           <rect
             x="14"
             y="3"
@@ -35,6 +45,7 @@ function Sidebar({
             stroke="currentColor"
             strokeWidth="1.8"
           />
+
           <rect
             x="3"
             y="14"
@@ -44,6 +55,7 @@ function Sidebar({
             stroke="currentColor"
             strokeWidth="1.8"
           />
+
           <rect
             x="14"
             y="14"
@@ -56,6 +68,7 @@ function Sidebar({
         </svg>
       ),
     },
+
     {
       label: t("navigation.expenses"),
       path: "/expenses",
@@ -70,6 +83,7 @@ function Sidebar({
             stroke="currentColor"
             strokeWidth="1.8"
           />
+
           <path
             d="M9 8h6M9 12h6M9 16h4"
             stroke="currentColor"
@@ -79,6 +93,7 @@ function Sidebar({
         </svg>
       ),
     },
+
     {
       label: t("navigation.account"),
       path: "/account",
@@ -91,6 +106,7 @@ function Sidebar({
             stroke="currentColor"
             strokeWidth="1.8"
           />
+
           <path
             d="M6.5 20v-2.5A5.5 5.5 0 0 1 12 12a5.5 5.5 0 0 1 5.5 5.5V20"
             stroke="currentColor"
@@ -102,14 +118,19 @@ function Sidebar({
     },
   ];
 
-  // Group is available for members only.
-  if (role === "member") {
+  /* =========================================================
+     GROUP MENU
+     ONLY PRO PLAN: plan_id = 3
+  ========================================================= */
+
+  if (planId === 3) {
     menuItems.push({
       label: t("navigation.group"),
       path: "/group",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
           <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.8" />
+
           <circle
             cx="16.5"
             cy="9"
@@ -117,12 +138,14 @@ function Sidebar({
             stroke="currentColor"
             strokeWidth="1.8"
           />
+
           <path
             d="M3.5 20v-2A5.5 5.5 0 0 1 9 12.5 5.5 5.5 0 0 1 14.5 18v2"
             stroke="currentColor"
             strokeWidth="1.8"
             strokeLinecap="round"
           />
+
           <path
             d="M15 14a4.5 4.5 0 0 1 5.5 4.4V20"
             stroke="currentColor"
@@ -134,40 +157,43 @@ function Sidebar({
     });
   }
 
+  /* =========================================================
+     SIDEBAR
+  ========================================================= */
+
   return (
     <aside
       className="
-    sticky
-    top-0
-    hidden
-    h-dvh
-    w-[240px]
-    shrink-0
-    self-start
-    overflow-y-auto
-    border-r
-    border-[#3b3525]
-    bg-[#171c22]
+        sticky
+        top-0
+        hidden
+        h-dvh
+        w-[240px]
+        shrink-0
+        self-start
+        overflow-y-auto
+        border-r
+        border-[#3b3525]
+        bg-[#171c22]
 
-    lg:flex
-    lg:flex-col
-  "
+        lg:flex
+        lg:flex-col
+      "
     >
       {/* Logo */}
 
-      <div className="flex h-[100px] items-center px-4 gap-3 mt-4">
+      <div className="mt-4 flex h-[100px] items-center gap-3 px-4">
         <img
           src={recuai}
           alt="Ivory Nexus Solutions"
           className="max-h-[84px] w-auto object-contain"
         />
-        <p className="text-[24px] font-semibold text-[#d4ad3f]">
- RecuAi
-        </p>
-       
+
+        <p className="text-[24px] font-semibold text-[#d4ad3f]">RecuAi</p>
       </div>
 
       {/* Navigation */}
+
       <nav className="mt-3 flex flex-col gap-2 px-4">
         {menuItems.map((item) => {
           const isActive = item.path === location.pathname;
@@ -210,6 +236,7 @@ function Sidebar({
         })}
 
         {/* Logout */}
+
         <button
           type="button"
           onClick={onLogout}
@@ -239,6 +266,7 @@ function Sidebar({
                 strokeWidth="1.8"
                 strokeLinecap="round"
               />
+
               <path
                 d="M14 8l4 4-4 4M8 12h10"
                 stroke="currentColor"

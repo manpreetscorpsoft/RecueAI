@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 function ExpenseFilters({
   variant = "expenses",
+
   filters = {
     search: "",
     category: "all",
@@ -10,9 +11,32 @@ function ExpenseFilters({
     sortDate: "",
     sortPrice: "",
   },
+
   categories = [],
+
   onFilterChange = () => {},
+
   onExport,
+
+  // =========================================================
+  // BULK DELETE
+  // =========================================================
+  bulkDeleteMode = false,
+
+  onToggleBulkDelete,
+
+  selectedCount = 0,
+
+  onBulkDelete,
+
+  // =========================================================
+  // SELECT ALL - CURRENT PAGINATION PAGE
+  // =========================================================
+  allCurrentPageSelected = false,
+
+  currentPageExpenseCount = 0,
+
+  onToggleSelectAll,
 }) {
   const isDashboard = variant === "dashboard";
 
@@ -21,22 +45,19 @@ function ExpenseFilters({
   };
 
   return (
-    <div
-      className={`
-        w-full
-        ${isDashboard ? "hidden lg:block" : "block"}
-      `}
-    >
-      {/* =========================
-          DASHBOARD DESKTOP
-      ========================== */}
+    <div className="w-full min-w-0">
+      {/* =====================================================
+          DASHBOARD
+      ====================================================== */}
 
       {isDashboard && (
         <div className="hidden lg:block">
           <div
             className="
               grid
-              grid-cols-[minmax(240px,1.7fr)_minmax(170px,1fr)_minmax(150px,1fr)_minmax(150px,1fr)_minmax(150px,1fr)]
+              w-full
+              min-w-0
+              grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]
               gap-4
             "
           >
@@ -78,13 +99,16 @@ function ExpenseFilters({
         </div>
       )}
 
-      {/* =========================
+      {/* =====================================================
           EXPENSE PAGE
-      ========================== */}
+      ====================================================== */}
 
       {!isDashboard && (
         <>
-          {/* Mobile */}
+          {/* =================================================
+              MOBILE / TABLET
+          ================================================== */}
+
           <div className="space-y-3 lg:hidden">
             <SearchField
               value={filters.search}
@@ -97,7 +121,17 @@ function ExpenseFilters({
               onChange={(value) => updateFilter("category", value)}
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            {/* Dates */}
+            <div
+              className="
+                grid
+                w-full
+                min-w-0
+                grid-cols-1
+                gap-3
+                sm:grid-cols-2
+              "
+            >
               <DateField
                 value={filters.fromDate}
                 onChange={(value) => updateFilter("fromDate", value)}
@@ -111,73 +145,178 @@ function ExpenseFilters({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <DateSortField
-                value={filters.sortDate}
-                onChange={(value) => updateFilter("sortDate", value)}
-              />
-
+            {/* Sorting */}
+            <div
+              className="
+                grid
+                w-full
+                grid-cols-1
+                gap-3
+                sm:grid-cols-2
+              "
+            >
               <PriceSortField
                 value={filters.sortPrice}
                 onChange={(value) => updateFilter("sortPrice", value)}
               />
+
+              <DateSortField
+                value={filters.sortDate}
+                onChange={(value) => updateFilter("sortDate", value)}
+              />
             </div>
 
+            {/* Export */}
             <ExportButton onExport={onExport} />
-          </div>
 
-          {/* Desktop */}
-          <div className="hidden lg:block">
+            {/* =================================================
+                MOBILE BULK DELETE AREA
+            ================================================== */}
+
             <div
               className="
                 grid
-                grid-cols-[minmax(260px,1.7fr)_minmax(180px,1fr)_minmax(165px,1fr)_minmax(165px,1fr)_145px]
+                w-full
+                grid-cols-1
+                gap-3
+                sm:grid-cols-2
+              "
+            >
+              {/* Select All Current Page */}
+              {bulkDeleteMode && currentPageExpenseCount > 0 ? (
+                <SelectAllButton
+                  allSelected={allCurrentPageSelected}
+                  currentPageExpenseCount={currentPageExpenseCount}
+                  onToggle={onToggleSelectAll}
+                />
+              ) : (
+                <div className="hidden sm:block" />
+              )}
+
+              {/* Bulk Delete */}
+              <BulkDeleteToggle
+                bulkDeleteMode={bulkDeleteMode}
+                onToggle={onToggleBulkDelete}
+              />
+            </div>
+
+            {/* Delete Selected */}
+            {bulkDeleteMode && selectedCount > 0 && (
+              <DeleteSelectedButton
+                selectedCount={selectedCount}
+                onBulkDelete={onBulkDelete}
+              />
+            )}
+          </div>
+
+          {/* =================================================
+              DESKTOP
+          ================================================== */}
+
+          <div className="hidden lg:block">
+            {/* =============================
+                FIRST ROW
+            ============================== */}
+
+            <div
+              className="
+                grid
+                w-full
+                min-w-0
+                grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_145px]
                 gap-4
               "
             >
-              <SearchField
-                value={filters.search}
-                onChange={(value) => updateFilter("search", value)}
-              />
+              {/* Search */}
+              <div className="min-w-0">
+                <SearchField
+                  value={filters.search}
+                  onChange={(value) => updateFilter("search", value)}
+                />
+              </div>
 
-              <CategoryField
-                value={filters.category}
-                categories={categories}
-                onChange={(value) => updateFilter("category", value)}
-              />
+              {/* Category */}
+              <div className="min-w-0">
+                <CategoryField
+                  value={filters.category}
+                  categories={categories}
+                  onChange={(value) => updateFilter("category", value)}
+                />
+              </div>
 
-              <DateField
-                value={filters.fromDate}
-                onChange={(value) => updateFilter("fromDate", value)}
-                label="From Date"
-              />
+              {/* From Date */}
+              <div className="min-w-0">
+                <DateField
+                  value={filters.fromDate}
+                  onChange={(value) => updateFilter("fromDate", value)}
+                  label="From Date"
+                />
+              </div>
 
-              <DateField
-                value={filters.toDate}
-                onChange={(value) => updateFilter("toDate", value)}
-                label="To Date"
-              />
+              {/* To Date */}
+              <div className="min-w-0">
+                <DateField
+                  value={filters.toDate}
+                  onChange={(value) => updateFilter("toDate", value)}
+                  label="To Date"
+                />
+              </div>
 
+              {/* Export */}
               <ExportButton onExport={onExport} />
             </div>
 
+            {/* =============================
+                SECOND ROW
+            ============================== */}
+
             <div
               className="
-                mt-4
+                mt-3
                 grid
-                max-w-[400px]
-                grid-cols-2
+                w-full
+                min-w-0
+                grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_145px]
                 gap-4
               "
             >
+              {/* Sort Price */}
               <PriceSortField
                 value={filters.sortPrice}
                 onChange={(value) => updateFilter("sortPrice", value)}
               />
 
+              {/* Sort Date */}
               <DateSortField
                 value={filters.sortDate}
                 onChange={(value) => updateFilter("sortDate", value)}
+              />
+
+              {/* Select All Current Page */}
+              <div className="min-w-0">
+                {bulkDeleteMode && currentPageExpenseCount > 0 && (
+                  <SelectAllButton
+                    allSelected={allCurrentPageSelected}
+                    currentPageExpenseCount={currentPageExpenseCount}
+                    onToggle={onToggleSelectAll}
+                  />
+                )}
+              </div>
+
+              {/* Delete Selected */}
+              <div className="min-w-0">
+                {bulkDeleteMode && selectedCount > 0 && (
+                  <DeleteSelectedButton
+                    selectedCount={selectedCount}
+                    onBulkDelete={onBulkDelete}
+                  />
+                )}
+              </div>
+
+              {/* Bulk Delete */}
+              <BulkDeleteToggle
+                bulkDeleteMode={bulkDeleteMode}
+                onToggle={onToggleBulkDelete}
               />
             </div>
           </div>
@@ -187,14 +326,20 @@ function ExpenseFilters({
   );
 }
 
+/* =========================================================
+   SEARCH
+========================================================= */
+
 function SearchField({ value, onChange }) {
   const { t } = useTranslation();
+
   return (
     <div
       className="
         flex
         h-[44px]
         w-full
+        min-w-0
         items-center
         rounded-[8px]
         border
@@ -206,11 +351,17 @@ function SearchField({ value, onChange }) {
       <svg
         viewBox="0 0 24 24"
         fill="none"
-        className="h-[17px] w-[17px] shrink-0 text-[#81858a]"
+        className="
+          h-[17px]
+          w-[17px]
+          shrink-0
+          text-[#81858a]
+        "
         stroke="currentColor"
         strokeWidth="2"
       >
         <circle cx="11" cy="11" r="6" />
+
         <path d="m16 16 4 4" strokeLinecap="round" />
       </svg>
 
@@ -234,8 +385,13 @@ function SearchField({ value, onChange }) {
   );
 }
 
+/* =========================================================
+   CATEGORY
+========================================================= */
+
 function CategoryField({ value, categories, onChange }) {
   const { t } = useTranslation();
+
   return (
     <select
       value={value}
@@ -243,6 +399,7 @@ function CategoryField({ value, categories, onChange }) {
       className="
         h-[44px]
         w-full
+        min-w-0
         rounded-[8px]
         border
         border-[#3a3f45]
@@ -264,37 +421,59 @@ function CategoryField({ value, categories, onChange }) {
   );
 }
 
+/* =========================================================
+   DATE
+========================================================= */
+
 function DateField({ value, onChange, label }) {
   const { t } = useTranslation();
+
   const labelKey =
     label === "From Date" ? "filters.fromDate" : "filters.toDate";
+
   return (
-    <div className="relative">
+    <div
+      className="
+        w-full
+        min-w-0
+        overflow-hidden
+      "
+    >
       <input
         type="date"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-label={t(labelKey)}
         className="
-        date-filter-input
+          date-filter-input
+          block
           h-[44px]
           w-full
+          min-w-0
+          max-w-full
+          box-border
           rounded-[8px]
           border
           border-[#3a3f45]
           bg-[#171c22]
-          px-4
+          px-3
           text-[12px]
           text-[#999ca1]
           outline-none
+          sm:px-4
         "
       />
     </div>
   );
 }
 
+/* =========================================================
+   DATE SORT
+========================================================= */
+
 function DateSortField({ value, onChange }) {
   const { t } = useTranslation();
+
   return (
     <select
       value={value}
@@ -302,6 +481,7 @@ function DateSortField({ value, onChange }) {
       className="
         h-[44px]
         w-full
+        min-w-0
         rounded-[8px]
         border
         border-[#3a3f45]
@@ -321,8 +501,13 @@ function DateSortField({ value, onChange }) {
   );
 }
 
+/* =========================================================
+   PRICE SORT
+========================================================= */
+
 function PriceSortField({ value, onChange }) {
   const { t } = useTranslation();
+
   return (
     <select
       value={value}
@@ -330,6 +515,7 @@ function PriceSortField({ value, onChange }) {
       className="
         h-[44px]
         w-full
+        min-w-0
         rounded-[8px]
         border
         border-[#3a3f45]
@@ -349,8 +535,13 @@ function PriceSortField({ value, onChange }) {
   );
 }
 
+/* =========================================================
+   EXPORT CSV
+========================================================= */
+
 function ExportButton({ onExport }) {
   const { t } = useTranslation();
+
   return (
     <button
       type="button"
@@ -364,8 +555,8 @@ function ExportButton({ onExport }) {
         gap-2
         rounded-[8px]
         bg-[#d5af42]
-        px-4
-        text-[13px]
+        px-3
+        text-[12px]
         font-semibold
         text-[#111418]
       "
@@ -373,7 +564,11 @@ function ExportButton({ onExport }) {
       <svg
         viewBox="0 0 24 24"
         fill="none"
-        className="h-[17px] w-[17px]"
+        className="
+          h-[17px]
+          w-[17px]
+          shrink-0
+        "
         stroke="currentColor"
         strokeWidth="2"
       >
@@ -383,19 +578,205 @@ function ExportButton({ onExport }) {
 
         <path d="M5 18v2h14v-2" strokeLinecap="round" />
       </svg>
-      {t("filters.exportCsv")}
+
+      <span>{t("filters.exportCsv")}</span>
     </button>
   );
 }
 
+/* =========================================================
+   SELECT ALL CURRENT PAGE
+========================================================= */
+
+function SelectAllButton({ allSelected, currentPageExpenseCount, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={allSelected}
+      className={`
+        flex
+        h-[44px]
+        w-full
+        items-center
+        justify-center
+        gap-2
+        rounded-[8px]
+        border
+        px-3
+        text-[11px]
+        font-semibold
+        transition-colors
+        duration-200
+
+        ${
+          allSelected
+            ? `
+              border-[#d5af42]
+              bg-[#353226]
+              text-[#d5af42]
+            `
+            : `
+              border-[#403a28]
+              bg-[#171c22]
+              text-[#a5a7aa]
+            `
+        }
+      `}
+    >
+      {/* Checkbox style indicator */}
+      <span
+        className={`
+          flex
+          h-[16px]
+          w-[16px]
+          shrink-0
+          items-center
+          justify-center
+          rounded-[3px]
+          border
+          text-[11px]
+          font-bold
+
+          ${
+            allSelected
+              ? `
+                border-[#d5af42]
+                bg-[#d5af42]
+                text-[#111418]
+              `
+              : `
+                border-[#777b81]
+                bg-transparent
+                text-transparent
+              `
+          }
+        `}
+      >
+        ✓
+      </span>
+
+      <span>
+        {allSelected
+          ? `Unselect All (${currentPageExpenseCount})`
+          : `Select All (${currentPageExpenseCount})`}
+      </span>
+    </button>
+  );
+}
+
+/* =========================================================
+   DELETE SELECTED BUTTON
+========================================================= */
+
+function DeleteSelectedButton({ selectedCount, onBulkDelete }) {
+  return (
+    <button
+      type="button"
+      onClick={onBulkDelete}
+      className="
+        flex
+        h-[44px]
+        w-full
+        items-center
+        justify-center
+        rounded-[8px]
+        bg-[#a93e3e]
+        px-3
+        text-[11px]
+        font-semibold
+        text-white
+        transition-colors
+        duration-200
+        hover:bg-[#963636]
+      "
+    >
+      Delete Selected ({selectedCount})
+    </button>
+  );
+}
+
+/* =========================================================
+   BULK DELETE TOGGLE
+========================================================= */
+
+function BulkDeleteToggle({ bulkDeleteMode, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={bulkDeleteMode}
+      className="
+        flex
+        h-[44px]
+        w-full
+        items-center
+        justify-center
+        gap-2
+        rounded-[8px]
+        border
+        border-[#403a28]
+        bg-[#171c22]
+        px-2
+        text-[11px]
+        font-medium
+        text-[#a5a7aa]
+      "
+    >
+      <span>Bulk Delete</span>
+
+      <span
+        className={`
+          relative
+          inline-flex
+          h-[20px]
+          w-[38px]
+          shrink-0
+          rounded-full
+          transition-colors
+          duration-200
+
+          ${bulkDeleteMode ? "bg-[#d5af42]" : "bg-[#44494e]"}
+        `}
+      >
+        <span
+          className={`
+            absolute
+            top-[2px]
+            h-[16px]
+            w-[16px]
+            rounded-full
+            bg-white
+            shadow
+            transition-transform
+            duration-200
+
+            ${bulkDeleteMode ? "translate-x-[20px]" : "translate-x-[2px]"}
+          `}
+        />
+      </span>
+    </button>
+  );
+}
+
+/* =========================================================
+   CATEGORY TRANSLATION
+========================================================= */
+
 function translateCategory(t, category) {
   const keys = {
     Fuel: "categories.fuel",
+
     Groceries: "categories.groceries",
+
     Utilities: "categories.utilities",
+
     Transport: "categories.transport",
+
     "Food & Dining": "categories.foodDining",
+
     Meals: "categories.meals",
+
     Shopping: "categories.shopping",
   };
 
