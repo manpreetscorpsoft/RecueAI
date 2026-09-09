@@ -113,12 +113,14 @@ function ExpenseList({
 
       <div
         className="
-          
+          hidden
+          lg:block
           overflow-hidden
           rounded-[14px]
           border
           border-[#403a28]
           bg-[#171c22]
+          
           
         "
       >
