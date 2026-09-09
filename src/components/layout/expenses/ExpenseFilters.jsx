@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { translateExpenseCategory } from "../../../data/expenseCategories";
 
 function ExpenseFilters({
   variant = "expenses",
@@ -414,7 +415,7 @@ function CategoryField({ value, categories, onChange }) {
 
       {categories.map((category) => (
         <option key={category} value={category}>
-          {translateCategory(t, category)}
+          {translateExpenseCategory(t, category)}
         </option>
       ))}
     </select>
@@ -589,6 +590,8 @@ function ExportButton({ onExport }) {
 ========================================================= */
 
 function SelectAllButton({ allSelected, currentPageExpenseCount, onToggle }) {
+  const { t } = useTranslation();
+
   return (
     <button
       type="button"
@@ -759,55 +762,6 @@ function BulkDeleteToggle({ bulkDeleteMode, onToggle }) {
       </span>
     </button>
   );
-}
-
-/* =========================================================
-   CATEGORY TRANSLATION
-========================================================= */
-
-function translateCategory(t, category) {
-  const keys = {
-    Fuel: "categories.fuel",
-
-    Groceries: "categories.groceries",
-
-    Utilities: "categories.utilities",
-
-    Transport: "categories.transport",
-
-    "Food & Dining": "categories.foodDining",
-
-    Meals: "categories.meals",
-
-    Shopping: "categories.shopping",
-    Accommodation: "categories.accommodation",
-    Communication: "categories.communication",
-    "Office supplies": "categories.officeSupplies",
-    "Equipment and materials": "categories.equipmentAndMaterials",
-    "Maintenance and repair": "categories.maintenanceAndRepair",
-    "Health and pharmacy": "categories.healthAndPharmacy",
-    Security: "categories.security",
-    Labour: "categories.labour",
-    Subcontracting: "categories.subcontracting",
-    "Bank charges": "categories.bankCharges",
-    "Taxes and customs": "categories.taxesAndCustoms",
-    Hospitality: "categories.hospitality",
-    "Equipment rental": "categories.equipmentRental",
-    "Office rent": "categories.officeRent",
-    "Electricity and water": "categories.electricityAndWater",
-    "Internet and telephone": "categories.internetAndTelephone",
-    "Printing and photocopying": "categories.printingAndPhotocopying",
-    "Postal charges": "categories.postalCharges",
-    "Legal fees": "categories.legalFees",
-    Insurance: "categories.insurance",
-    "Business cards and marketing": "categories.businessCardsAndMarketing",
-    "Donations and subscriptions": "categories.donationsAndSubscriptions",
-    "Travel expenses": "categories.travelExpenses",
-    "Visa and immigration": "categories.visaAndImmigration",
-    Other: "categories.other",
-  };
-
-  return keys[category] ? t(keys[category]) : category;
 }
 
 export default ExpenseFilters;

@@ -15,7 +15,6 @@ import DeleteExpenseModal from "../../components/layout/expenses/DeleteExpenseMo
 import ExpenseDeleteSuccessModal from "../../components/layout/expenses/ExpenseDeleteSuccessModal";
 import { applyUserLanguage } from "../../i18n/i18n";
 import { useTranslation } from "react-i18next";
-import { EXPENSE_CATEGORIES } from "../../data/expenseCategories";
 function DashboardPage() {
   const { t } = useTranslation();
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -236,11 +235,8 @@ function DashboardPage() {
   };
   const categories = useMemo(() => {
     return [
-      ...new Set([
-        ...EXPENSE_CATEGORIES,
-        ...expenses.map((expense) => expense.category).filter(Boolean),
-      ]),
-    ];
+      ...new Set(expenses.map((expense) => expense.category).filter(Boolean)),
+    ].sort();
   }, [expenses]);
 
   const filteredExpenses = useMemo(() => {

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { translateExpenseCategory } from "../../../data/expenseCategories";
 
 function ExpenseList({
   expenses = [],
@@ -224,7 +225,7 @@ function ExpenseList({
                       `}
                     >
                       <span className="truncate">
-                        {translateCategory(t, expense.category)}
+                        {translateExpenseCategory(t, expense.category)}
                       </span>
                     </span>
                   </td>
@@ -471,7 +472,7 @@ function ExpenseList({
                     ${getCategoryStyle(expense.category)}
                   `}
                 >
-                  {translateCategory(t, expense.category)}
+                  {translateExpenseCategory(t, expense.category)}
                 </span>
               </div>
 
@@ -781,30 +782,6 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
       </button>
     </div>
   );
-}
-
-/* =========================================================
-   CATEGORY TRANSLATION
-========================================================= */
-
-function translateCategory(t, category) {
-  const keys = {
-    Fuel: "categories.fuel",
-
-    Groceries: "categories.groceries",
-
-    Utilities: "categories.utilities",
-
-    Transport: "categories.transport",
-
-    "Food & Dining": "categories.foodDining",
-
-    Meals: "categories.meals",
-
-    Shopping: "categories.shopping",
-  };
-
-  return keys[category] ? t(keys[category]) : category;
 }
 
 export default ExpenseList;

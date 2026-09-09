@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  EXPENSE_CATEGORIES,
+  normalizeExpenseCategory,
+  translateExpenseCategory,
+} from "../../../data/expenseCategories";
 
 function EditExpenseModal({ expense, onClose, onUpdate, updating = false }) {
   const { t } = useTranslation();
@@ -16,12 +21,12 @@ function EditExpenseModal({ expense, onClose, onUpdate, updating = false }) {
 
     setForm({
       supplier: expense.supplier || "",
-      category: expense.category || "",
+      category: normalizeExpenseCategory(expense.category, t),
       amount: expense.rawAmount ?? "",
       description: expense.description || "",
       purchaseDate: formatDateForDisplay(expense.purchaseDate),
     });
-  }, [expense]);
+  }, [expense, t]);
 
   if (!expense) {
     return null;
@@ -52,17 +57,12 @@ function EditExpenseModal({ expense, onClose, onUpdate, updating = false }) {
     });
   };
 
+  const normalizedCurrentCategory = normalizeExpenseCategory(
+    expense.category,
+    t,
+  );
   const categories = [
-    ...new Set([
-      expense.category,
-      "Fuel",
-      "Groceries",
-      "Utilities",
-      "Transport",
-      "Food & Dining",
-      "Meals",
-      "Shopping",
-    ]),
+    ...new Set([normalizedCurrentCategory, ...EXPENSE_CATEGORIES]),
   ].filter(Boolean);
 
   return (
@@ -166,7 +166,7 @@ function EditExpenseModal({ expense, onClose, onUpdate, updating = false }) {
               >
                 {categories.map((category) => (
                   <option key={category} value={category}>
-                    {translateCategory(t, category)}
+                    {translateExpenseCategory(t, category)}
                   </option>
                 ))}
               </select>
@@ -364,19 +364,6 @@ const inputClass = `
   outline-none
   focus:border-[#d5af42]
 `;
-
-function translateCategory(t, category) {
-  const keys = {
-    Fuel: "categories.fuel",
-    Groceries: "categories.groceries",
-    Utilities: "categories.utilities",
-    Transport: "categories.transport",
-    "Food & Dining": "categories.foodDining",
-    Meals: "categories.meals",
-    Shopping: "categories.shopping",
-  };
-  return keys[category] ? t(keys[category]) : category;
-}
 
 function FormLabel({ children }) {
   return (
