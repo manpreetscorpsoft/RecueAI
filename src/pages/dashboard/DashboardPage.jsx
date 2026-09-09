@@ -15,6 +15,7 @@ import DeleteExpenseModal from "../../components/layout/expenses/DeleteExpenseMo
 import ExpenseDeleteSuccessModal from "../../components/layout/expenses/ExpenseDeleteSuccessModal";
 import { applyUserLanguage } from "../../i18n/i18n";
 import { useTranslation } from "react-i18next";
+import { EXPENSE_CATEGORIES } from "../../data/expenseCategories";
 function DashboardPage() {
   const { t } = useTranslation();
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -235,8 +236,11 @@ function DashboardPage() {
   };
   const categories = useMemo(() => {
     return [
-      ...new Set(expenses.map((expense) => expense.category).filter(Boolean)),
-    ].sort();
+      ...new Set([
+        ...EXPENSE_CATEGORIES,
+        ...expenses.map((expense) => expense.category).filter(Boolean),
+      ]),
+    ];
   }, [expenses]);
 
   const filteredExpenses = useMemo(() => {
@@ -273,6 +277,15 @@ function DashboardPage() {
       result = result.filter(
         (expense) =>
           expense.purchaseDate && expense.purchaseDate <= filters.toDate,
+      );
+    }
+
+    // Show the latest submitted expense first unless a date sort is selected.
+    if (!filters.sortDate) {
+      result.sort(
+        (a, b) =>
+          new Date(b.submissionDateRaw || b.purchaseDate).getTime() -
+          new Date(a.submissionDateRaw || a.purchaseDate).getTime(),
       );
     }
 

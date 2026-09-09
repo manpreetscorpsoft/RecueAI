@@ -53,6 +53,7 @@ export async function getUserExpenses(userId) {
 
     /* Submission / Creation Date */
     submissionDate: formatExpenseDate(expense.created_at),
+    submissionDateRaw: expense.created_at || "",
 
     /* Supplier */
     supplier: expense.supplier || "-",

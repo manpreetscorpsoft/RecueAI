@@ -658,8 +658,8 @@ function SelectAllButton({ allSelected, currentPageExpenseCount, onToggle }) {
 
       <span>
         {allSelected
-          ? `Unselect All (${currentPageExpenseCount})`
-          : `Select All (${currentPageExpenseCount})`}
+          ? t("filters.unselectAll", { count: currentPageExpenseCount })
+          : t("filters.selectAll", { count: currentPageExpenseCount })}
       </span>
     </button>
   );
@@ -670,6 +670,7 @@ function SelectAllButton({ allSelected, currentPageExpenseCount, onToggle }) {
 ========================================================= */
 
 function DeleteSelectedButton({ selectedCount, onBulkDelete }) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -691,7 +692,7 @@ function DeleteSelectedButton({ selectedCount, onBulkDelete }) {
         hover:bg-[#963636]
       "
     >
-      Delete Selected ({selectedCount})
+      {t("filters.deleteSelected", { count: selectedCount })}
     </button>
   );
 }
@@ -701,6 +702,7 @@ function DeleteSelectedButton({ selectedCount, onBulkDelete }) {
 ========================================================= */
 
 function BulkDeleteToggle({ bulkDeleteMode, onToggle }) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -723,7 +725,7 @@ function BulkDeleteToggle({ bulkDeleteMode, onToggle }) {
         text-[#a5a7aa]
       "
     >
-      <span>Bulk Delete</span>
+      <span>{t("filters.bulkDelete")}</span>
 
       <span
         className={`
@@ -778,6 +780,31 @@ function translateCategory(t, category) {
     Meals: "categories.meals",
 
     Shopping: "categories.shopping",
+    Accommodation: "categories.accommodation",
+    Communication: "categories.communication",
+    "Office supplies": "categories.officeSupplies",
+    "Equipment and materials": "categories.equipmentAndMaterials",
+    "Maintenance and repair": "categories.maintenanceAndRepair",
+    "Health and pharmacy": "categories.healthAndPharmacy",
+    Security: "categories.security",
+    Labour: "categories.labour",
+    Subcontracting: "categories.subcontracting",
+    "Bank charges": "categories.bankCharges",
+    "Taxes and customs": "categories.taxesAndCustoms",
+    Hospitality: "categories.hospitality",
+    "Equipment rental": "categories.equipmentRental",
+    "Office rent": "categories.officeRent",
+    "Electricity and water": "categories.electricityAndWater",
+    "Internet and telephone": "categories.internetAndTelephone",
+    "Printing and photocopying": "categories.printingAndPhotocopying",
+    "Postal charges": "categories.postalCharges",
+    "Legal fees": "categories.legalFees",
+    Insurance: "categories.insurance",
+    "Business cards and marketing": "categories.businessCardsAndMarketing",
+    "Donations and subscriptions": "categories.donationsAndSubscriptions",
+    "Travel expenses": "categories.travelExpenses",
+    "Visa and immigration": "categories.visaAndImmigration",
+    Other: "categories.other",
   };
 
   return keys[category] ? t(keys[category]) : category;

@@ -138,18 +138,16 @@ function ExpenseList({
                 text-[#a5a7aa]
               "
             >
+              {/* Submission Date */}
+              <th className="w-[15%] px-5">
+                {t("expenseList.submissionDate")}
+              </th>
+
               {/* Purchase Date */}
-              <th className="w-[11%] px-5">{t("expenseList.date")}</th>
+              <th className="w-[11%] px-4">{t("expenseList.date")}</th>
 
               {/* Supplier */}
               <th className="w-[22%] px-4">{t("expenseList.supplier")}</th>
-
-              {/* Submission Date */}
-              <th className="w-[15%] px-4">
-                {t("expenseList.submissionDate", {
-                  defaultValue: "Submission Date",
-                })}
-              </th>
 
               {/* Category */}
               <th className="w-[16%] px-4">{t("expenseList.category")}</th>
@@ -187,8 +185,13 @@ function ExpenseList({
                     ${isSelected ? "bg-[#25261f]" : ""}
                   `}
                 >
+                  {/* Submission Date */}
+                  <td className="px-5 text-[#9a9da2]">
+                    {expense.submissionDate || "-"}
+                  </td>
+
                   {/* Purchase Date */}
-                  <td className="px-5 text-[#9a9da2]">{expense.date || "-"}</td>
+                  <td className="px-4 text-[#9a9da2]">{expense.date || "-"}</td>
 
                   {/* Supplier */}
                   <td
@@ -200,11 +203,6 @@ function ExpenseList({
                     "
                   >
                     <div className="truncate">{expense.supplier || "-"}</div>
-                  </td>
-
-                  {/* Submission Date */}
-                  <td className="px-4 text-[#9a9da2]">
-                    {expense.submissionDate || "-"}
                   </td>
 
                   {/* Category */}
