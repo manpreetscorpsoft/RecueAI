@@ -668,7 +668,7 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
 
   const pages = totalPages <= 5
     ? Array.from({ length: totalPages }, (_, index) => index + 1)
-    : [...new Set([1, 2, currentPage, totalPages - 1, totalPages])]
+    : [...new Set([1, 2, currentPage, currentPage + 1, totalPages - 1, totalPages])]
         .filter((page) => page >= 1 && page <= totalPages)
         .sort((a, b) => a - b);
   const visiblePages = [];
@@ -721,6 +721,7 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
           return <span key={page} className="flex h-8 w-5 shrink-0 items-center justify-center text-[#979a9f]" aria-hidden="true">...</span>;
         }
         const isActive = page === currentPage;
+        const isNextPage = page === currentPage + 1;
 
         return (
           <button
@@ -738,6 +739,10 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
                 border
                 px-1 sm:px-2
                 text-[12px]
+                transition-colors
+                focus-visible:outline-2
+                focus-visible:outline-offset-2
+                focus-visible:outline-[#d5af42]
 
                 ${
                   isActive
@@ -746,11 +751,21 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
                       bg-[#353226]
                       text-[#d5af42]
                     `
-                    : `
-                      border-[#3c4146]
-                      bg-transparent
-                      text-[#979a9f]
-                    `
+                    : isNextPage
+                      ? `
+                        border-[#3c4146]
+                        bg-[#22272c]
+                        text-[#92969d]
+                        hover:border-[#5b4d24]
+                        hover:text-[#d5af42]
+                      `
+                      : `
+                        border-[#3c4146]
+                        bg-transparent
+                        text-[#b0b3b8]
+                        hover:border-[#5b4d24]
+                        hover:text-[#d5af42]
+                      `
                 }
               `}
           >

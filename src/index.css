@@ -1,7 +1,96 @@
 @import "tailwindcss";
 
+/* Keep native date controls out of grid intrinsic sizing (notably iOS Safari). */
+.date-filter-field {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 44px;
+  overflow: hidden;
+  border: 1px solid #3a3f45;
+  border-radius: 8px;
+  background: #171c22;
+}
+
+.date-filter-field:focus-within {
+  border-color: #d5af42;
+  box-shadow: 0 0 0 1px #d5af42;
+}
+
+.date-filter-input {
+  position: absolute;
+  inset: 0;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  color: #999ca1;
+  font-family: inherit;
+  font-size: 16px;
+  text-align: left;
+  outline: none;
+}
+
+.date-filter-input::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
+
+.date-filter-input::-webkit-datetime-edit {
+  min-width: 0;
+  padding: 0;
+}
+
+.date-filter-placeholder {
+  position: absolute;
+  inset: 0 36px 0 12px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #999ca1;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* Show the browser's date segments when focused for keyboard editing. */
+.date-filter-field[data-empty="true"]:not(:focus-within) .date-filter-input {
+  color: transparent;
+}
+
+.date-filter-field[data-empty="true"]:not(:focus-within) .date-filter-input::-webkit-datetime-edit {
+  opacity: 0;
+}
+
+.date-filter-field[data-empty="true"]:not(:focus-within) .date-filter-input::-webkit-date-and-time-value {
+  opacity: 0;
+}
+
+.date-filter-field:focus-within .date-filter-placeholder {
+  display: none;
+}
+
 .date-filter-input::-webkit-calendar-picker-indicator {
+  flex-shrink: 0;
   filter: invert(1);
   opacity: 0.6;
   cursor: pointer;
+}
+
+@media (min-width: 1024px) and (pointer: fine) {
+  .date-filter-input {
+    font-size: 13px;
+  }
 }

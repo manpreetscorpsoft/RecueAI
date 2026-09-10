@@ -434,38 +434,20 @@ function DateField({ value, onChange, label }) {
     label === "From Date" ? "filters.fromDate" : "filters.toDate";
 
   return (
-    <div
-      className="
-        w-full
-        min-w-0
-        overflow-hidden
-      "
-    >
+    <label className="date-filter-field" data-empty={!value}>
+      <span className="sr-only">{t(labelKey)}</span>
       <input
         type="date"
-        value={value}
+        value={value || ""}
         onChange={(event) => onChange(event.target.value)}
-        aria-label={t(labelKey)}
-        className="
-          date-filter-input
-          block
-          h-[44px]
-          w-full
-          min-w-0
-          max-w-full
-          box-border
-          rounded-[8px]
-          border
-          border-[#3a3f45]
-          bg-[#171c22]
-          px-3
-          text-[12px]
-          text-[#999ca1]
-          outline-none
-          sm:px-4
-        "
+        className="date-filter-input"
       />
-    </div>
+      {!value && (
+        <span className="date-filter-placeholder" aria-hidden="true">
+          {t(labelKey)}
+        </span>
+      )}
+    </label>
   );
 }
 
