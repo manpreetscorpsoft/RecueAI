@@ -66,7 +66,7 @@ const resources = {
         member: "Member",
       },
       filters: {
-        searchSupplier: "Search supplier...",
+        searchSupplier: "Search supplier or category...",
         allCategories: "All Categories",
         fromDate: "From Date",
         toDate: "To Date",
@@ -287,7 +287,7 @@ const resources = {
         member: "Membre",
       },
       filters: {
-        searchSupplier: "Rechercher un fournisseur...",
+        searchSupplier: "Rechercher fournisseur ou cat\u00e9gorie...",
         allCategories: "Toutes les catégories",
         fromDate: "Date de début",
         toDate: "Date de fin",

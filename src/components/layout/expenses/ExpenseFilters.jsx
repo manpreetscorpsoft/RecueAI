@@ -371,6 +371,7 @@ function SearchField({ value, onChange }) {
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={t("filters.searchSupplier")}
+        aria-label={t("filters.searchSupplier")}
         className="
           ml-3
           min-w-0

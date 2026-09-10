@@ -97,8 +97,8 @@ function GroupPage() {
         // =========================================
 
         setMembers(groupMembers.map(mapMember));
-      } catch (err) {
-        console.error("Unable to load group details:", err);
+      } catch {
+        console.error("Unable to load group details:");
 
         setError("Unable to load group information.");
       } finally {

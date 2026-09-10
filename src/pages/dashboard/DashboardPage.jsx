@@ -1,13 +1,11 @@
+import { createExpenseMatcher } from "../../data/expenseCategories";
+import useExpensePages from "../../hooks/useExpensePages";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import StatCard from "../../components/layout/StatCard";
 import ExpenseList from "../../components/layout/expenses/ExpenseList";
 import EditExpenseModal from "../../components/layout/expenses/EditExpenseModal";
 import ExpenseUpdateSuccessModal from "../../components/layout/expenses/ExpenseUpdateSuccessModal";
-import {
-  getUserExpenses,
-  updateExpense,
-  deleteExpense,
-} from "../../services/expenseService";
+import { updateExpense, deleteExpense } from "../../services/expenseService";
 import { getUserFullDetails } from "../../services/userService";
 import ExpenseFilters from "../../components/layout/expenses/ExpenseFilters";
 import { useEffect, useMemo, useState } from "react";
@@ -20,10 +18,22 @@ function DashboardPage() {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   const userId = storedUser.user_id;
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "all",
+    fromDate: "",
+    toDate: "",
+    sortDate: "",
+    sortPrice: "",
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const localFiltering = Boolean(
+    filters.search.trim() || filters.category !== "all" ||
+    filters.fromDate || filters.toDate || filters.sortDate || filters.sortPrice,
+  );
+  const { hasLoaded, expenses, metadata, loading: expensesLoading, error: expensesError, loadExpenses } =
+    useExpensePages(userId, currentPage, setCurrentPage, localFiltering, "dashboard.unableToLoadExpenses");
 
-  const [expenses, setExpenses] = useState([]);
-  const [expensesLoading, setExpensesLoading] = useState(true);
-  const [expensesError, setExpensesError] = useState("");
   const [accountData, setAccountData] = useState(null);
   const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -36,10 +46,10 @@ function DashboardPage() {
   const dashboardData = useMemo(() => {
     const expenseLimit = accountData?.expenseLimit ?? 0;
     const expensesUsed = accountData?.expensesUsed ?? 0;
-    const totalExpenses = expenses.reduce(
+    const totalExpenses = Number(metadata.total_amount ?? expenses.reduce(
       (total, expense) => total + Number(expense.rawAmount || 0),
       0,
-    );
+    ));
     const percentageUsed = expenseLimit
       ? Math.min(100, Math.round((expensesUsed / expenseLimit) * 100))
       : 0;
@@ -57,18 +67,9 @@ function DashboardPage() {
       planExpiry: accountData?.planExpires || "-",
       percentageUsed,
     };
-  }, [accountData, expenses]);
-  const [filters, setFilters] = useState({
-    search: "",
-    category: "all",
-    fromDate: "",
-    toDate: "",
-    sortDate: "",
-    sortPrice: "",
-  });
-  const [currentPage, setCurrentPage] = useState(1);
+  }, [accountData, expenses, metadata.total_amount]);
 
-  const itemsPerPage = 5;
+  const itemsPerPage = metadata.page_size;
   const CrownIcon = () => (
     <svg
       viewBox="0 0 24 24"
@@ -159,31 +160,13 @@ function DashboardPage() {
         layoutRole:
           isGroupAccount && groupRole === "member" ? "member" : "admin",
       });
-    } catch (err) {
-      console.error("Unable to load dashboard account details:", err);
-    }
-  };
-
-  const loadExpenses = async () => {
-    try {
-      setExpensesLoading(true);
-      setExpensesError("");
-
-      const data = await getUserExpenses(userId);
-
-      setExpenses(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Unable to load dashboard expenses:", err);
-
-      setExpensesError("dashboard.unableToLoadExpenses");
-    } finally {
-      setExpensesLoading(false);
+    } catch {
+      console.error("Unable to load dashboard account details:");
     }
   };
 
   useEffect(() => {
     loadAccountDetails();
-    loadExpenses();
   }, []);
   const handleUpdateExpense = async (values) => {
     try {
@@ -203,8 +186,8 @@ function DashboardPage() {
 
       // Show success popup
       setShowUpdateSuccess(true);
-    } catch (err) {
-      console.error("Unable to update expense:", err);
+    } catch {
+      console.error("Unable to update expense:");
     } finally {
       setUpdating(false);
     }
@@ -227,40 +210,26 @@ function DashboardPage() {
 
       // Show success popup
       setShowDeleteSuccess(true);
-    } catch (err) {
-      console.error("Unable to delete expense:", err);
+    } catch {
+      console.error("Unable to delete expense:");
     } finally {
       setDeleting(false);
     }
   };
   const categories = useMemo(() => {
+    if (metadata.available_categories) return metadata.available_categories;
     return [
       ...new Set(expenses.map((expense) => expense.category).filter(Boolean)),
     ].sort();
-  }, [expenses]);
+  }, [expenses, metadata.available_categories]);
 
   const filteredExpenses = useMemo(() => {
+    if (!localFiltering) return expenses;
     let result = [...expenses];
 
-    // Search supplier
-    if (filters.search.trim()) {
-      const searchValue = filters.search.trim().toLowerCase();
+    // Search supplier and category
+    result = result.filter(createExpenseMatcher(filters, t));
 
-      result = result.filter((expense) =>
-        String(expense.supplier || "")
-          .toLowerCase()
-          .includes(searchValue),
-      );
-    }
-
-    // Category
-    if (filters.category !== "all") {
-      result = result.filter(
-        (expense) => expense.category === filters.category,
-      );
-    }
-
-    // From date
     if (filters.fromDate) {
       result = result.filter(
         (expense) =>
@@ -314,19 +283,24 @@ function DashboardPage() {
     }
 
     return result;
-  }, [expenses, filters]);
+  }, [expenses, filters, localFiltering, t]);
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredExpenses.length / itemsPerPage),
+    Math.ceil((localFiltering ? filteredExpenses.length : metadata.total_expense) / itemsPerPage),
   );
 
+  if (localFiltering && currentPage > totalPages) {
+    setCurrentPage(totalPages);
+  }
+
   const paginatedExpenses = useMemo(() => {
+    if (!localFiltering) return expenses;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
 
     return filteredExpenses.slice(startIndex, endIndex);
-  }, [filteredExpenses, currentPage]);
+  }, [filteredExpenses, currentPage, localFiltering, expenses, itemsPerPage]);
 
   const handleFilterChange = (name, value) => {
     setFilters((current) => {
@@ -525,7 +499,7 @@ function DashboardPage() {
 
         {/* Shared expense list */}
         <div className="mt-5">
-          {expensesLoading && (
+          {expensesLoading && !hasLoaded && (
             <div className="mt-5 text-[14px] text-[#999ca1]">
               {t("dashboard.loadingExpenses")}
             </div>
@@ -537,15 +511,22 @@ function DashboardPage() {
             </div>
           )}
 
-          {!expensesLoading && !expensesError && (
+          {hasLoaded && (
             <div className="mt-4 lg:mt-5">
               <ExpenseList
                 expenses={paginatedExpenses}
-                totalExpenses={filteredExpenses.length}
+                loading={expensesLoading}
+                totalExpenses={localFiltering ? filteredExpenses.length : metadata.total_expense}
                 showPagination
-                currentPage={currentPage}
+                currentPage={localFiltering ? currentPage : (metadata.page_no ?? currentPage)}
                 totalPages={totalPages}
-                onPageChange={setCurrentPage}
+                onPageChange={(page) => {
+                  if (page === currentPage) {
+                    void loadExpenses();
+                  } else {
+                    setCurrentPage(page);
+                  }
+                }}
                 itemsPerPage={itemsPerPage}
                 onEdit={(expense) => {
                   setSelectedExpense(expense);

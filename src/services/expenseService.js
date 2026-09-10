@@ -4,41 +4,52 @@ import { supabase } from "../lib/supabase";
    GET USER EXPENSES 
 ========================================================= */
 
-export async function getUserExpenses(userId) {
+export async function getUserExpenses(userId, page = 1) {
   if (!userId) {
     throw new Error("User ID is required");
   }
 
-  console.log("Loading expenses for user:", userId);
+  const requestedPage = Number(page);
+  if (!Number.isSafeInteger(requestedPage) || requestedPage < 1) {
+    throw new Error("Page must be a positive integer");
+  }
 
-  const { data, error } = await supabase.rpc("svc_get_user_expenses", {
-    p_user_id: Number(userId),
-  });
+  const params = { p_user_id: Number(userId), p_page: requestedPage };
+  const { data, error } = await supabase.rpc("svc_get_user_expenses", params);
 
   if (error) {
-    console.error("Get user expenses error:", error);
+    console.error("Get user expenses error:");
     throw error;
   }
 
-  /* 
-    svc_get_user_expenses returns: 
- 
-    { 
-      success: true, 
-      user_id: ..., 
-      expenses: [...] 
-    } 
-  */
-
-  const expenses = Array.isArray(data) ? data : data?.expenses || [];
-
+  // RPCs may return the JSON object directly or as a single result row.
+  const response = Array.isArray(data) && data.length === 1 && Array.isArray(data[0]?.expenses)
+    ? data[0]
+    : data;
+  if (response?.success === false) {
+    throw new Error("Unable to load expenses");
+  }
+  const expenses = response?.expenses;
   if (!Array.isArray(expenses)) {
-    console.error("Expenses response is not an array:", expenses);
-
-    return [];
+    throw new Error("Invalid expenses response");
   }
 
-  return expenses.map((expense) => ({
+  const totalExpense = Number(response.total_expense);
+  if (response.total_expense == null || response.total_expense === "" ||
+      !Number.isSafeInteger(totalExpense) || totalExpense < 0) {
+    throw new Error("Invalid total expense count");
+  }
+  const reportedSize = Number(response.page_size);
+  const pageSize = Number.isSafeInteger(reportedSize) && reportedSize > 0 ? reportedSize : 10;
+  const totalPages = Math.ceil(totalExpense / pageSize);
+  const reportedPage = Number(response.page_no ?? requestedPage);
+  if (!Number.isSafeInteger(reportedPage) || reportedPage < 1 ||
+      (requestedPage <= Math.max(1, totalPages) && reportedPage !== requestedPage)) {
+    throw new Error("Expense response does not match the requested page");
+  }
+
+
+  const mappedExpenses = expenses.map((expense) => ({
     /* Expense ID */
     id: expense.e_id,
 
@@ -89,6 +100,29 @@ export async function getUserExpenses(userId) {
     /* User */
     userId: expense.user_id,
   }));
+
+  return {
+    ...response,
+    expenses: mappedExpenses,
+    page_no: reportedPage,
+    page_size: pageSize,
+    total_pages: totalPages,
+    total_expense: totalExpense,
+    page_elements: mappedExpenses.length,
+    has_next_page: reportedPage < totalPages,
+    has_previous_page: reportedPage > 1 && totalExpense > 0,
+  };
+}
+
+// Preserve full-dataset filtering/export until filter RPC inputs are available.
+export async function getAllUserExpenses(userId) {
+  const first = await getUserExpenses(userId, 1);
+  const expenses = [...first.expenses];
+  for (let page = 2; page <= first.total_pages; page += 1) {
+    const result = await getUserExpenses(userId, page);
+    expenses.push(...result.expenses);
+  }
+  return { ...first, expenses };
 }
 
 /* ========================================================= 
@@ -178,7 +212,7 @@ export async function updateExpense({
   });
 
   if (error) {
-    console.error("Update expense error:", error);
+    console.error("Update expense error:");
 
     throw error;
   }
@@ -199,11 +233,9 @@ export async function deleteExpense(expenseId) {
     p_expense_id: expenseId,
   });
 
-  console.log("Delete expense response:", data);
-  console.log("Delete expense error:", error);
 
   if (error) {
-    console.error("Delete expense RPC error:", error);
+    console.error("Delete expense RPC error:");
     throw error;
   }
 
@@ -222,7 +254,7 @@ export async function logoutUser() {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    console.error("Logout error:", error);
+    console.error("Logout error:");
 
     throw error;
   }
@@ -254,11 +286,9 @@ export async function bulkDeleteExpenses(expenseIds) {
     p_expense_ids: cleanExpenseIds,
   });
 
-  console.log("Bulk delete response:", data);
-  console.log("Bulk delete error:", error);
 
   if (error) {
-    console.error("Bulk delete RPC error:", error);
+    console.error("Bulk delete RPC error:");
     throw error;
   }
 

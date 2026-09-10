@@ -20,7 +20,6 @@ function AccountPage() {
 
       const data = await getUserFullDetails(userId);
 
-      console.log("Account page API response:", data);
 
       if (!data?.success || !data?.user) {
         throw new Error("User account details were not returned.");
@@ -75,8 +74,8 @@ function AccountPage() {
       };
 
       setAccountData(userDetails);
-    } catch (err) {
-      console.error("Unable to load account details:", err);
+    } catch {
+      console.error("Unable to load account details:");
       setError("Unable to load account information.");
     } finally {
       setLoading(false);

@@ -1,3 +1,5 @@
+import { createExpenseMatcher } from "../../data/expenseCategories";
+import useExpensePages from "../../hooks/useExpensePages";
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import ExpenseFilters from "../../components/layout/expenses/ExpenseFilters";
@@ -6,7 +8,7 @@ import EditExpenseModal from "../../components/layout/expenses/EditExpenseModal"
 import ExpenseUpdateSuccessModal from "../../components/layout/expenses/ExpenseUpdateSuccessModal";
 import BulkDeleteConfirmModal from "../../components/layout/expenses/BulkDeleteConfirmModal";
 import {
-  getUserExpenses,
+  getAllUserExpenses,
   updateExpense,
   deleteExpense,
   bulkDeleteExpenses,
@@ -24,16 +26,25 @@ function ExpensesPage() {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   const userId = storedUser.user_id;
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "all",
+    fromDate: "",
+    toDate: "",
+    sortDate: "",
+    sortPrice: "",
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const localFiltering = Boolean(
+    filters.search.trim() || filters.category !== "all" ||
+    filters.fromDate || filters.toDate || filters.sortDate || filters.sortPrice,
+  );
+  const { hasLoaded, expenses, metadata, loading, error, loadExpenses } =
+    useExpensePages(userId, currentPage, setCurrentPage, localFiltering, "expenses.loadError");
 
   /* =====================================================
      STATE
   ===================================================== */
-
-  const [expenses, setExpenses] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-
-  const [error, setError] = useState("");
 
   const [accountData, setAccountData] = useState(null);
 
@@ -63,62 +74,29 @@ function ExpensesPage() {
   const layoutRole = accountData?.layoutRole || "admin";
 
   /* =====================================================
-     FILTER STATE
-  ===================================================== */
-
-  const [filters, setFilters] = useState({
-    search: "",
-    category: "all",
-    fromDate: "",
-    toDate: "",
-    sortDate: "",
-    sortPrice: "",
-  });
-
-  /* =====================================================
      CATEGORIES
   ===================================================== */
 
   const categories = useMemo(() => {
+    if (metadata.available_categories) return metadata.available_categories;
     return [
       ...new Set(expenses.map((expense) => expense.category).filter(Boolean)),
     ].sort();
-  }, [expenses]);
+  }, [expenses, metadata.available_categories]);
 
   /* =====================================================
      FILTER EXPENSES
   ===================================================== */
 
   const filteredExpenses = useMemo(() => {
+    if (!localFiltering) return expenses;
     let result = [...expenses];
 
     // =========================
-    // SEARCH SUPPLIER
+    // SEARCH SUPPLIER AND CATEGORY
     // =========================
 
-    if (filters.search.trim()) {
-      const searchValue = filters.search.trim().toLowerCase();
-
-      result = result.filter((expense) =>
-        String(expense.supplier || "")
-          .toLowerCase()
-          .includes(searchValue),
-      );
-    }
-
-    // =========================
-    // CATEGORY
-    // =========================
-
-    if (filters.category !== "all") {
-      result = result.filter(
-        (expense) => expense.category === filters.category,
-      );
-    }
-
-    // =========================
-    // FROM DATE
-    // =========================
+    result = result.filter(createExpenseMatcher(filters, t));
 
     if (filters.fromDate) {
       result = result.filter(
@@ -180,19 +158,17 @@ function ExpensesPage() {
     }
 
     return result;
-  }, [expenses, filters]);
+  }, [expenses, filters, localFiltering, t]);
 
   /* =====================================================
      BULK DELETE TOGGLE
   ===================================================== */
 
   const handleToggleBulkDelete = () => {
-    console.log("Bulk delete toggle clicked");
 
     setBulkDeleteMode((current) => {
       const next = !current;
 
-      console.log("Bulk delete mode:", next);
 
       if (!next) {
         setSelectedExpenseIds([]);
@@ -207,7 +183,6 @@ function ExpensesPage() {
   ===================================================== */
 
   const handleToggleExpenseSelection = (expenseId) => {
-    console.log("Expense checkbox clicked:", expenseId);
 
     setSelectedExpenseIds((current) => {
       if (current.includes(expenseId)) {
@@ -238,11 +213,9 @@ function ExpensesPage() {
     try {
       setBulkDeleting(true);
 
-      console.log("Bulk deleting expense IDs:", selectedExpenseIds);
 
       const result = await bulkDeleteExpenses(selectedExpenseIds);
 
-      console.log("Bulk delete result:", result);
 
       if (result?.success) {
         // Close confirmation popup
@@ -257,8 +230,8 @@ function ExpensesPage() {
         // Reload latest expenses
         await loadExpenses();
       }
-    } catch (err) {
-      console.error("Unable to bulk delete expenses:", err);
+    } catch {
+      console.error("Unable to bulk delete expenses:");
     } finally {
       setBulkDeleting(false);
     }
@@ -268,22 +241,25 @@ function ExpensesPage() {
      PAGINATION
   ===================================================== */
 
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const itemsPerPage = 10;
+  const itemsPerPage = metadata.page_size;
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredExpenses.length / itemsPerPage),
+    Math.ceil((localFiltering ? filteredExpenses.length : metadata.total_expense) / itemsPerPage),
   );
 
+  if (localFiltering && currentPage > totalPages) {
+    setCurrentPage(totalPages);
+  }
+
   const paginatedExpenses = useMemo(() => {
+    if (!localFiltering) return expenses;
     const startIndex = (currentPage - 1) * itemsPerPage;
 
     const endIndex = startIndex + itemsPerPage;
 
     return filteredExpenses.slice(startIndex, endIndex);
-  }, [filteredExpenses, currentPage]);
+  }, [filteredExpenses, currentPage, localFiltering, expenses, itemsPerPage]);
 
   const currentPageExpenseIds = paginatedExpenses
     .map((expense) => expense.id)
@@ -321,24 +297,6 @@ function ExpensesPage() {
      LOAD EXPENSES
   ===================================================== */
 
-  const loadExpenses = async () => {
-    try {
-      setLoading(true);
-
-      setError("");
-
-      const data = await getUserExpenses(userId);
-
-      setExpenses(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Unable to load expenses:", err);
-
-      setError("expenses.loadError");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   /* =====================================================
      LOAD ACCOUNT DETAILS
   ===================================================== */
@@ -367,8 +325,8 @@ function ExpensesPage() {
         layoutRole:
           isGroupAccount && groupRole === "member" ? "member" : "admin",
       });
-    } catch (err) {
-      console.error("Unable to load account details:", err);
+    } catch {
+      console.error("Unable to load account details:");
     }
   };
 
@@ -379,7 +337,6 @@ function ExpensesPage() {
   useEffect(() => {
     loadAccountDetails();
 
-    loadExpenses();
   }, []);
 
   /* =====================================================
@@ -404,8 +361,8 @@ function ExpensesPage() {
 
       // Show success popup
       setShowUpdateSuccess(true);
-    } catch (err) {
-      console.error("Unable to update expense:", err);
+    } catch {
+      console.error("Unable to update expense:");
     } finally {
       setUpdating(false);
     }
@@ -415,8 +372,17 @@ function ExpensesPage() {
      EXPORT CSV
   ===================================================== */
 
-  const handleExportCsv = () => {
+  const handleExportCsv = async () => {
     if (filteredExpenses.length === 0) {
+      return;
+    }
+
+    let exportExpenses;
+    try {
+      exportExpenses = localFiltering ? filteredExpenses : (await getAllUserExpenses(userId)).expenses;
+    } catch {
+      console.error("Unable to export expenses:");
+      window.alert(t("expenses.loadError"));
       return;
     }
 
@@ -430,7 +396,7 @@ function ExpensesPage() {
       "Receipt URL",
     ];
 
-    const rows = filteredExpenses.map((expense) => [
+    const rows = exportExpenses.map((expense) => [
       expense.purchaseDate || "",
 
       expense.supplier || "",
@@ -515,8 +481,8 @@ function ExpensesPage() {
       await loadExpenses();
 
       setShowDeleteSuccess(true);
-    } catch (err) {
-      console.error("Unable to delete expense:", err);
+    } catch {
+      console.error("Unable to delete expense:");
     } finally {
       setDeleting(false);
     }
@@ -602,7 +568,7 @@ function ExpensesPage() {
           LOADING
       ========================== */}
 
-      {loading && (
+      {loading && !hasLoaded && (
         <div className="mt-6 text-[14px] text-[#999ca1]">
           {t("expenses.loading")}
         </div>
@@ -620,16 +586,23 @@ function ExpensesPage() {
           EXPENSE LIST
       ========================== */}
 
-      {!loading && !error && (
+      {hasLoaded && (
         <div className="mt-5 lg:mt-10">
           <ExpenseList
             expenses={paginatedExpenses}
-            totalExpenses={filteredExpenses.length}
+                loading={loading}
+            totalExpenses={localFiltering ? filteredExpenses.length : metadata.total_expense}
             showPagination
-            currentPage={currentPage}
+            currentPage={localFiltering ? currentPage : (metadata.page_no ?? currentPage)}
             totalPages={totalPages}
             itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
+            onPageChange={(page) => {
+                  if (page === currentPage) {
+                    void loadExpenses();
+                  } else {
+                    setCurrentPage(page);
+                  }
+                }}
             onEdit={(expense) => {
               setSelectedExpense(expense);
             }}

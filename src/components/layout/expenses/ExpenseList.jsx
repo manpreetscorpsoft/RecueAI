@@ -3,6 +3,7 @@ import { translateExpenseCategory } from "../../../data/expenseCategories";
 
 function ExpenseList({
   expenses = [],
+  loading = false,
   showPagination = true,
   totalExpenses,
   onEdit,
@@ -25,9 +26,9 @@ function ExpenseList({
   const displayTotal = totalExpenses ?? expenses.length;
 
   const startItem =
-    displayTotal === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    displayTotal === 0 || expenses.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
 
-  const endItem = Math.min(currentPage * itemsPerPage, displayTotal);
+  const endItem = startItem === 0 ? 0 : Math.min(startItem + expenses.length - 1, displayTotal);
 
   /* =========================================================
      CATEGORY STYLES
@@ -107,7 +108,14 @@ function ExpenseList({
   );
 
   return (
-    <>
+    <div className="relative" aria-busy={loading}>
+      {loading && (
+        <>
+          <div className="absolute inset-x-0 top-0 z-10 h-0.5 animate-pulse rounded-full bg-[#d5af42]" />
+          <span role="status" className="sr-only">{t("expenses.loading")}</span>
+        </>
+      )}
+      <div inert={loading} className={loading ? "opacity-70 transition-opacity" : "transition-opacity"}>
       {/* =========================================
           DESKTOP TABLE
       ========================================== */}
@@ -216,7 +224,7 @@ function ExpenseList({
                         max-w-full
                         rounded-[6px]
                         border
-                        px-2
+                        px-1 sm:px-2
                         py-1
                         text-[11px]
                         leading-tight
@@ -464,7 +472,7 @@ function ExpenseList({
                     max-w-[145px]
                     rounded-[5px]
                     border
-                    px-2
+                    px-1 sm:px-2
                     py-[3px]
                     text-[10px]
                     leading-tight
@@ -646,7 +654,8 @@ function ExpenseList({
           </div>
         )}
       </div>
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -657,28 +666,18 @@ function ExpenseList({
 function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
   const { t } = useTranslation();
 
-  const getVisiblePages = () => {
-    if (totalPages <= 3) {
-      return Array.from(
-        {
-          length: totalPages,
-        },
-        (_, index) => index + 1,
-      );
+  const pages = totalPages <= 5
+    ? Array.from({ length: totalPages }, (_, index) => index + 1)
+    : [...new Set([1, 2, currentPage, totalPages - 1, totalPages])]
+        .filter((page) => page >= 1 && page <= totalPages)
+        .sort((a, b) => a - b);
+  const visiblePages = [];
+  pages.forEach((page, index) => {
+    if (index > 0 && page - pages[index - 1] > 1) {
+      visiblePages.push(`gap-${page}`);
     }
-
-    if (currentPage <= 2) {
-      return [1, 2, 3];
-    }
-
-    if (currentPage >= totalPages - 1) {
-      return [totalPages - 2, totalPages - 1, totalPages];
-    }
-
-    return [currentPage - 1, currentPage, currentPage + 1];
-  };
-
-  const visiblePages = getVisiblePages();
+    visiblePages.push(page);
+  });
 
   const goToPage = (page) => {
     if (page < 1 || page > totalPages || page === currentPage) {
@@ -689,12 +688,12 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex max-w-full items-center gap-1 sm:gap-2">
       {/* Previous */}
 
       <button
         type="button"
-        disabled={currentPage === 1}
+        disabled={currentPage <= 1}
         onClick={() => goToPage(currentPage - 1)}
         className="
           flex
@@ -712,28 +711,32 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
           disabled:opacity-40
         "
       >
-        <span aria-label={t("expenseList.previous")}>‹</span>
+        <span aria-label={t("expenseList.previous")}>&#8249;</span>
       </button>
 
       {/* Page Numbers */}
 
       {visiblePages.map((page) => {
+        if (typeof page === "string") {
+          return <span key={page} className="flex h-8 w-5 shrink-0 items-center justify-center text-[#979a9f]" aria-hidden="true">...</span>;
+        }
         const isActive = page === currentPage;
 
         return (
           <button
             key={page}
             type="button"
+            aria-current={isActive ? "page" : undefined}
             onClick={() => goToPage(page)}
             className={`
                 flex
                 h-8
-                min-w-8
+                min-w-7 sm:min-w-8
                 items-center
                 justify-center
                 rounded-[6px]
                 border
-                px-2
+                px-1 sm:px-2
                 text-[12px]
 
                 ${
@@ -760,7 +763,7 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
 
       <button
         type="button"
-        disabled={currentPage === totalPages}
+        disabled={currentPage >= totalPages}
         onClick={() => goToPage(currentPage + 1)}
         className="
           flex
@@ -778,7 +781,7 @@ function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
           disabled:opacity-40
         "
       >
-        <span aria-label={t("expenseList.next")}>›</span>
+        <span aria-label={t("expenseList.next")}>&#8250;</span>
       </button>
     </div>
   );

@@ -7,11 +7,9 @@ import { supabase } from "../lib/supabase";
 export async function getGroupMembers() {
   const { data, error } = await supabase.rpc("svc_get_my_group_members");
 
-  console.log("Group members response:", data);
-  console.log("Group members error:", error);
 
   if (error) {
-    console.error("Get group members RPC error:", error);
+    console.error("Get group members RPC error:");
 
     throw error;
   }

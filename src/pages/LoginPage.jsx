@@ -189,7 +189,6 @@ function LoginPage() {
       ? `+${cleanPhone}`
       : `${countryCode}${cleanPhone}`;
 
-    console.log("Full phone:", fullPhone);
 
     try {
       setIsLoading(true);
@@ -206,16 +205,14 @@ function LoginPage() {
         },
       );
 
-      console.log("Verify response:", verifyData);
 
-      console.log("Verify error:", verifyError);
 
       // =====================================================
       // 5. CHECK VERIFICATION ERROR
       // =====================================================
 
       if (verifyError) {
-        console.error("svc_verify_login error:", verifyError);
+        console.error("svc_verify_login error:");
 
         if (
           verifyError.message?.includes("Invalid phone number or password") ||
@@ -275,7 +272,6 @@ function LoginPage() {
         return;
       }
 
-      console.log("User verification successful:", verifyData);
 
       // =====================================================
       // 7. CREATE SUPABASE AUTH SESSION
@@ -288,16 +284,14 @@ function LoginPage() {
           password: password,
         });
 
-      console.log("Supabase Auth response:", authData);
 
-      console.log("Supabase Auth error:", authError);
 
       // =====================================================
       // 8. CHECK AUTH ERROR
       // =====================================================
 
       if (authError) {
-        console.error("Supabase Auth error:", authError);
+        console.error("Supabase Auth error:");
 
         alert(
           "Authentication failed. Please check your phone number and password.",
@@ -322,16 +316,11 @@ function LoginPage() {
       // 10. JWT
       // =====================================================
 
-      const accessToken = authData.session.access_token;
 
-      const refreshToken = authData.session.refresh_token;
 
-      console.log("JWT generated:", !!accessToken);
 
-      console.log("Refresh token generated:", !!refreshToken);
 
-      // Do NOT log actual JWT in production
-      // console.log("JWT:", accessToken);
+
 
       // =====================================================
       // 11. CHECK AUTH USER ID MATCH
@@ -366,7 +355,6 @@ function LoginPage() {
         return;
       }
 
-      console.log("Dynamic logged-in user ID:", userId);
 
       // =====================================================
       // 13. SAVE USER INFORMATION
@@ -392,7 +380,6 @@ function LoginPage() {
       // Supabase automatically stores/manages
       // the authentication session and JWT.
 
-      console.log("Login successful:", verifyData);
 
       // =====================================================
       // 14. REDIRECT
@@ -407,8 +394,8 @@ function LoginPage() {
       navigate(destination, {
         replace: true,
       });
-    } catch (error) {
-      console.error("Unexpected login error:", error);
+    } catch {
+      console.error("Unexpected login error:");
 
       alert("Something went wrong. Please try again.");
     } finally {

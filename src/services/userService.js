@@ -13,18 +13,11 @@ export async function getUserFullDetails(userId) {
   );
 
   if (error) {
-    console.error(
-      "Get user full details error:",
-      error
-    );
+    console.error("Get user full details error:");
 
     throw error;
   }
 
-  console.log(
-    "RAW user full details response:",
-    data
-  );
 
   return data;
 }

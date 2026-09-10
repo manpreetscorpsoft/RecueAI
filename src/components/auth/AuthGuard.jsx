@@ -17,7 +17,7 @@ function AuthGuard() {
       if (!isMounted) return;
 
       if (error) {
-        console.error("Unable to restore authentication session:", error);
+        console.error("Unable to restore authentication session:");
       }
 
       setSession(error ? null : data.session);

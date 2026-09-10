@@ -24,8 +24,8 @@ function DashboardLayout({
       navigate("/login", {
         replace: true,
       });
-    } catch (error) {
-      console.error("Unable to logout:", error);
+    } catch {
+      console.error("Unable to logout:");
     }
   };
 
