@@ -1,10 +1,9 @@
 import recuai from "../assets/recuai.png";
 import { useTranslation } from "react-i18next";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-// Use the same Supabase client used in your other API functions
-import { supabase } from "../lib/supabase";
+import { formatLoginPhone, requestEmailOtp, verifyEmailOtp } from "../services/authService";
 import CreateAccountModal from "../components/auth/CreateAccountModal";
 
 function LoginPage() {
@@ -30,6 +29,26 @@ function LoginPage() {
   const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
 
   const otpRefs = useRef([]);
+  const busyRef = useRef(false);
+  const [otpPhone, setOtpPhone] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [resendSeconds, setResendSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!resendSeconds) return;
+    const timer = setTimeout(() => setResendSeconds((seconds) => Math.max(0, seconds - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [resendSeconds]);
+
+  useEffect(() => {
+    if (otpPhone) otpRefs.current[0]?.focus();
+  }, [otpPhone]);
+
+  const resetOtp = () => {
+    setOtpPhone("");
+    setOtpBoxes(["", "", "", "", "", ""]);
+    setLoginError("");
+  };
 
   // =====================================================
   // COUNTRY CODES
@@ -119,19 +138,16 @@ function LoginPage() {
   // =====================================================
 
   const handleOtpChange = (index, value) => {
-    // Allow numbers only
-    const cleanValue = value.replace(/\D/g, "").slice(0, 1);
-
-    const updatedOtp = [...otpBoxes];
-
-    updatedOtp[index] = cleanValue;
-
-    setOtpBoxes(updatedOtp);
-
-    // Automatically move to next OTP box
-    if (cleanValue && index < otpBoxes.length - 1) {
-      otpRefs.current[index + 1]?.focus();
-    }
+    const digits = value.replace(/\D/g, "").slice(0, 6);
+    const start = digits.length === 6 ? 0 : index;
+    const updated = [...otpBoxes];
+    if (!digits) updated[index] = "";
+    [...digits].forEach((digit, offset) => {
+      if (start + offset < 6) updated[start + offset] = digit;
+    });
+    setOtpBoxes(updated);
+    setLoginError("");
+    if (digits) otpRefs.current[Math.min(start + digits.length, 5)]?.focus();
   };
 
   // =====================================================
@@ -156,249 +172,48 @@ function LoginPage() {
   // VERIFY LOGIN
   // =====================================================
 
-  const handleVerify = async () => {
-    const cleanPhone = phone.replace(/\D/g, "");
-
-    const password = otpBoxes.join("");
-
-    // =====================================================
-    // 1. CHECK PHONE
-    // =====================================================
-
-    if (!cleanPhone) {
-      alert("Please enter your phone number.");
-      return;
-    }
-
-    // =====================================================
-    // 2. CHECK PASSWORD
-    // =====================================================
-
-    if (password.length !== 6) {
-      alert("Please enter your 6-digit password.");
-      return;
-    }
-
-    // =====================================================
-    // 3. BUILD FULL PHONE NUMBER
-    // =====================================================
-
-    const countryDigits = countryCode.replace(/\D/g, "");
-
-    const fullPhone = cleanPhone.startsWith(countryDigits)
-      ? `+${cleanPhone}`
-      : `${countryCode}${cleanPhone}`;
-
-
+  const handleRequestOtp = async () => {
+    if (busyRef.current || resendSeconds > 0) return;
+    busyRef.current = true;
+    setIsLoading(true);
+    setLoginError("");
     try {
-      setIsLoading(true);
-
-      // =====================================================
-      // 4. VERIFY USER USING svc_verify_login
-      // =====================================================
-
-      const { data: verifyData, error: verifyError } = await supabase.rpc(
-        "svc_verify_login",
-        {
-          p_phone: fullPhone,
-          p_password: password,
-        },
-      );
-
-
-
-      // =====================================================
-      // 5. CHECK VERIFICATION ERROR
-      // =====================================================
-
-      if (verifyError) {
-        console.error("svc_verify_login error:");
-
-        if (
-          verifyError.message?.includes("Invalid phone number or password") ||
-          verifyError.message?.includes("User not found") ||
-          verifyError.message?.includes("No account found")
-        ) {
-          setIsCreateAccountOpen(true);
-          return;
-        }
-
-        if (
-          verifyError.message?.includes(
-            "Authentication account is not configured",
-          )
-        ) {
-          alert("Authentication account is not configured.");
-          return;
-        }
-
-        if (verifyError.message?.includes("Authentication account not found")) {
-          setIsCreateAccountOpen(true);
-          return;
-        }
-
-        if (
-          verifyError.message?.includes("Authentication account phone mismatch")
-        ) {
-          alert("Authentication account phone mismatch.");
-          return;
-        }
-
-        alert(verifyError.message || "Unable to verify login.");
-
-        return;
-      }
-
-      // =====================================================
-      // 6. VERIFY SUCCESS RESPONSE
-      // =====================================================
-
-      if (
-        !verifyData ||
-        verifyData.success !== true ||
-        verifyData.login_verified !== true
-      ) {
-        const userDoesNotExist =
-          verifyData?.user_exists === false ||
-          verifyData?.account_exists === false ||
-          verifyData?.reason === "user_not_found";
-
-        if (userDoesNotExist) {
-          setIsCreateAccountOpen(true);
-          return;
-        }
-
-        alert("Login verification failed.");
-        return;
-      }
-
-
-      // =====================================================
-      // 7. CREATE SUPABASE AUTH SESSION
-      // THIS GENERATES THE JWT
-      // =====================================================
-
-      const { data: authData, error: authError } =
-        await supabase.auth.signInWithPassword({
-          phone: fullPhone,
-          password: password,
-        });
-
-
-
-      // =====================================================
-      // 8. CHECK AUTH ERROR
-      // =====================================================
-
-      if (authError) {
-        console.error("Supabase Auth error:");
-
-        alert(
-          "Authentication failed. Please check your phone number and password.",
-        );
-
-        return;
-      }
-
-      // =====================================================
-      // 9. MAKE SURE SESSION EXISTS
-      // =====================================================
-
-      if (!authData?.session) {
-        console.error("No authentication session returned.");
-
-        alert("Authentication session could not be created.");
-
-        return;
-      }
-
-      // =====================================================
-      // 10. JWT
-      // =====================================================
-
-
-
-
-
-
-
-      // =====================================================
-      // 11. CHECK AUTH USER ID MATCH
-      // =====================================================
-
-      if (
-        verifyData.auth_user_id &&
-        authData.user?.id !== verifyData.auth_user_id
-      ) {
-        console.error("Authentication user ID mismatch");
-
-        await supabase.auth.signOut();
-
-        alert("Authentication account mismatch.");
-
-        return;
-      }
-
-      // =====================================================
-      // 12. GET DYNAMIC USER ID
-      // =====================================================
-
-      const userId = verifyData.user_id;
-
-      if (!userId) {
-        console.error("User ID was not returned from svc_verify_login.");
-
-        await supabase.auth.signOut();
-
-        alert("User account could not be identified.");
-
-        return;
-      }
-
-
-      // =====================================================
-      // 13. SAVE USER INFORMATION
-      // =====================================================
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          user_id: userId,
-
-          auth_user_id: verifyData.auth_user_id,
-
-          phone: verifyData.phone,
-
-          language: verifyData.language,
-
-          plan_id: verifyData.plan_id,
-
-          default_currency: verifyData.default_currency,
-        }),
-      );
-
-      // Supabase automatically stores/manages
-      // the authentication session and JWT.
-
-
-      // =====================================================
-      // 14. REDIRECT
-      // =====================================================
-
-      const returnTo = location.state?.returnTo;
-      const destination =
-        typeof returnTo === "string" && returnTo.startsWith("/")
-          ? returnTo
-          : "/dashboard";
-
-      navigate(destination, {
-        replace: true,
-      });
-    } catch {
-      console.error("Unexpected login error:");
-
-      alert("Something went wrong. Please try again.");
+      const fullPhone = formatLoginPhone(phone, countryCode);
+      await requestEmailOtp(fullPhone);
+      setOtpBoxes(["", "", "", "", "", ""]);
+      setOtpPhone(fullPhone);
+      setResendSeconds(60);
+      otpRefs.current[0]?.focus();
+    } catch (error) {
+      setLoginError(error.message?.startsWith("auth.") ? error.message : "auth.sendOtpError");
     } finally {
+      busyRef.current = false;
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (busyRef.current || !otpPhone) return;
+    const otp = otpBoxes.join("");
+    if (!/^\d{6}$/.test(otp)) {
+      setLoginError("auth.invalidOtp");
+      return;
+    }
+    busyRef.current = true;
+    setIsLoading(true);
+    setLoginError("");
+    try {
+      const user = await verifyEmailOtp(otpPhone, otp);
+      localStorage.setItem("user", JSON.stringify(user));
+      const returnTo = location.state?.returnTo;
+      const destination = typeof returnTo === "string" && returnTo.startsWith("/") &&
+        !returnTo.startsWith("//") && !returnTo.includes("\\")
+        ? returnTo : "/dashboard";
+      navigate(destination, { replace: true });
+    } catch (error) {
+      setLoginError(error.message?.startsWith("auth.") ? error.message : "auth.verifyOtpError");
+    } finally {
+      busyRef.current = false;
       setIsLoading(false);
     }
   };
@@ -495,6 +310,11 @@ function LoginPage() {
           </p>
         </div>
 
+        <form onSubmit={(event) => {
+          event.preventDefault();
+          if (otpPhone) void handleVerify();
+          else void handleRequestOtp();
+        }}>
         {/* Phone Number */}
 
         <div
@@ -555,7 +375,9 @@ function LoginPage() {
 
             <select
               value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
+              disabled={isLoading}
+              aria-label={t("auth.countryCode")}
+              onChange={(e) => { setCountryCode(e.target.value); resetOtp(); }}
               className="
                 shrink-0
                 cursor-pointer
@@ -580,7 +402,10 @@ function LoginPage() {
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              disabled={isLoading}
+              autoComplete="tel-national"
+              aria-label={t("auth.phoneLabel")}
+              onChange={(e) => { setPhone(e.target.value); resetOtp(); }}
               placeholder={t("auth.phonePlaceholder")}
               className="
                 ml-3
@@ -596,16 +421,21 @@ function LoginPage() {
           </div>
         </div>
 
+        {loginError && <p role="alert" className="mt-4 text-sm text-red-400">{t(loginError)}</p>}
         {/* Send OTP */}
 
         <button
-          type="button"
+          type={otpPhone ? "button" : "submit"}
+          onClick={otpPhone ? handleRequestOtp : undefined}
+          disabled={isLoading || resendSeconds > 0}
           className="
             mt-5
             h-[54px]
             w-full
             rounded-[8px]
             bg-[#d5af42]
+            disabled:cursor-not-allowed
+            disabled:opacity-50
             text-[14px]
             font-semibold
             text-[#101010]
@@ -616,30 +446,14 @@ function LoginPage() {
             [@media(max-height:800px)]:h-[48px]
           "
         >
-          {t("auth.sendOtp")}
+          {resendSeconds > 0 ? t("auth.resendCountdown", { seconds: resendSeconds })
+            : isLoading && !otpPhone ? t("auth.sendingOtp")
+            : t(otpPhone ? "auth.resendOtp" : "auth.sendOtp")}
         </button>
 
-        {/* Divider */}
-
-        <div
-          className="
-            my-6
-            flex
-            items-center
-            gap-4
-
-            [@media(max-height:800px)]:my-4
-          "
-        >
-          <div className="h-px flex-1 bg-[#2b3037]" />
-
-          <span className="text-[11px] font-medium text-[#aaa]">
-            {t("auth.or")}
-          </span>
-
-          <div className="h-px flex-1 bg-[#2b3037]" />
-        </div>
-
+        {otpPhone && (
+          <>
+            <p role="status" className="my-4 text-sm text-[#b0b3b8]">{t("auth.otpSentEmail")}</p>
         {/* OTP Section */}
 
         <div>
@@ -666,7 +480,13 @@ function LoginPage() {
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                maxLength="1"
+                maxLength={6}
+                disabled={isLoading}
+                aria-label={t("auth.otpDigit", { digit: index + 1 })}
+                onPaste={(event) => {
+                  event.preventDefault();
+                  handleOtpChange(index, event.clipboardData.getData("text"));
+                }}
                 value={value}
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
@@ -703,15 +523,16 @@ function LoginPage() {
         {/* Verify Button */}
 
         <button
-          type="button"
-          onClick={handleVerify}
-          disabled={isLoading}
+          type="submit"
+          disabled={isLoading || otpBoxes.some((digit) => !digit)}
           className="
             mt-5
             h-[54px]
             w-full
             rounded-[8px]
             bg-[#d5af42]
+            disabled:cursor-not-allowed
+            disabled:opacity-50
             text-[14px]
             font-semibold
             text-[#101010]
@@ -722,8 +543,12 @@ function LoginPage() {
             [@media(max-height:800px)]:h-[48px]
           "
         >
-          {isLoading ? "Verifying..." : t("auth.verify")}
+          {isLoading ? t("auth.verifyingOtp") : t("auth.verify")}
         </button>
+
+          </>
+        )}
+        </form>
 
         {/* Security Message */}
 

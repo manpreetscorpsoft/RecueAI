@@ -5,6 +5,20 @@ const resources = {
   en: {
     translation: {
       auth: {
+        otpSentEmail: "An OTP has been sent to your registered email.",
+        sendingOtp: "Sending code...",
+        resendOtp: "RESEND CODE",
+        resendCountdown: "Resend code in {{seconds}}s",
+        verifyingOtp: "Verifying...",
+        invalidPhone: "Please enter a valid phone number with the correct country code.",
+        invalidOtp: "Please enter the 6-digit code from your email.",
+        sendOtpError: "Unable to send the code. Check your phone number and try again.",
+        verifyOtpError: "Unable to verify the code. Check it or request a new code.",
+        sessionError: "Unable to complete sign-in. Please contact support.",
+        tooManyAttempts: "Too many attempts. Please wait before trying again.",
+        countryCode: "Country calling code",
+        otpDigit: "Verification code digit {{digit}}",
+
         welcomeBack: "Welcome back",
         loginDescription:
           "Login with your phone number to access your expense dashboard",
@@ -126,6 +140,9 @@ const resources = {
         title: "Account",
         description: "Manage your account information",
         userInformation: "User Information",
+        email: "Email",
+        userId: "User ID",
+        registrationDate: "Registration Date",
         whatsappNumber: "WhatsApp Number",
         language: "Language",
         currency: "Currency",
@@ -225,6 +242,20 @@ const resources = {
   fr: {
     translation: {
       auth: {
+        otpSentEmail: "Un code a \u00e9t\u00e9 envoy\u00e9 \u00e0 votre adresse e-mail enregistr\u00e9e.",
+        sendingOtp: "Envoi du code...",
+        resendOtp: "RENVOYER LE CODE",
+        resendCountdown: "Renvoyer le code dans {{seconds}} s",
+        verifyingOtp: "V\u00e9rification...",
+        invalidPhone: "Veuillez saisir un num\u00e9ro valide avec le bon indicatif.",
+        invalidOtp: "Saisissez le code \u00e0 6 chiffres re\u00e7u par e-mail.",
+        sendOtpError: "Impossible d\u2019envoyer le code. V\u00e9rifiez votre num\u00e9ro et r\u00e9essayez.",
+        verifyOtpError: "Impossible de v\u00e9rifier le code. V\u00e9rifiez-le ou demandez un nouveau code.",
+        sessionError: "Impossible de terminer la connexion. Contactez l\u2019assistance.",
+        tooManyAttempts: "Trop de tentatives. Veuillez patienter avant de r\u00e9essayer.",
+        countryCode: "Indicatif t\u00e9l\u00e9phonique",
+        otpDigit: "Chiffre {{digit}} du code de v\u00e9rification",
+
         welcomeBack: "Bon retour",
         loginDescription:
           "Connectez-vous avec votre numéro de téléphone pour accéder à votre tableau de bord des dépenses",
@@ -347,6 +378,9 @@ const resources = {
         title: "Compte",
         description: "Gérez les informations de votre compte",
         userInformation: "Informations utilisateur",
+        email: "E-mail",
+        userId: "Identifiant utilisateur",
+        registrationDate: "Date d'inscription",
         whatsappNumber: "Numéro WhatsApp",
         language: "Langue",
         currency: "Devise",

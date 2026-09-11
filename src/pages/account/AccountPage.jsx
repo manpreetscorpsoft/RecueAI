@@ -42,7 +42,9 @@ function AccountPage() {
         isGroupAccount && groupRole === "member" ? "member" : "admin";
 
       const userDetails = {
-        userId: user.user_id,
+        userId: user.user_id ?? "-",
+        email: cleanText(user.email) || "-",
+        registrationDate: formatAccountDate(user.registration_date),
         phone: cleanText(user.phone),
         language: cleanText(user.language),
         currency:
@@ -235,8 +237,20 @@ function AccountPage() {
           {/* Rows */}
           <div className="mt-6">
             <InfoRow
+              label={t("account.userId")}
+              value={accountData.userId}
+            />
+            <InfoRow
               label={t("account.whatsappNumber")}
               value={accountData.phone}
+            />
+            <InfoRow
+              label={t("account.email")}
+              value={accountData.email}
+            />
+            <InfoRow
+              label={t("account.registrationDate")}
+              value={accountData.registrationDate}
             />
             <InfoRow
               label={t("account.language")}
@@ -434,7 +448,7 @@ function InfoRow({ label, value, last = false }) {
     >
       <span className="text-[13px] text-[#9a9da2] sm:text-[14px]">{label}</span>
 
-      <div className="text-right text-[13px] font-medium text-[#f0ede7] sm:text-[14px]">
+      <div className="min-w-0 break-words text-right text-[13px] font-medium text-[#f0ede7] sm:text-[14px]">
         {value}
       </div>
     </div>
