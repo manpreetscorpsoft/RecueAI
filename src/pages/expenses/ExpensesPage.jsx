@@ -100,8 +100,11 @@ function ExpensesPage() {
 
     if (filters.fromDate) {
       result = result.filter(
-        (expense) =>
-          expense.purchaseDate && expense.purchaseDate >= filters.fromDate,
+        (expense) => {
+          // Match the calendar date displayed in the submission column.
+          const submissionDate = expense.submissionDateRaw?.slice(0, 10);
+          return submissionDate && submissionDate >= filters.fromDate;
+        },
       );
     }
 
@@ -111,8 +114,11 @@ function ExpensesPage() {
 
     if (filters.toDate) {
       result = result.filter(
-        (expense) =>
-          expense.purchaseDate && expense.purchaseDate <= filters.toDate,
+        (expense) => {
+          // Match the calendar date displayed in the submission column.
+          const submissionDate = expense.submissionDateRaw?.slice(0, 10);
+          return submissionDate && submissionDate <= filters.toDate;
+        },
       );
     }
 
