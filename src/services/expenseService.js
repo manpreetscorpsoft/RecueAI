@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
    GET USER EXPENSES 
 ========================================================= */
 
-export async function getUserExpenses(userId, page = 1) {
+export async function getUserExpenses(userId, page = 1, search = "") {
   if (!userId) {
     throw new Error("User ID is required");
   }
@@ -14,7 +14,11 @@ export async function getUserExpenses(userId, page = 1) {
     throw new Error("Page must be a positive integer");
   }
 
-  const params = { p_user_id: Number(userId), p_page: requestedPage };
+  const params = {
+    p_user_id: Number(userId),
+    p_page: requestedPage,
+    p_search: search.trim(),
+  };
   const { data, error } = await supabase.rpc("svc_get_user_expenses", params);
 
   if (error) {
@@ -99,6 +103,12 @@ export async function getUserExpenses(userId, page = 1) {
 
     /* User */
     userId: expense.user_id,
+
+    /* Preserve the expense owner's phone, including country code and leading zeros. */
+    phone: [expense.phone_number, expense.phone]
+      .filter((value) => typeof value === "string" || typeof value === "number")
+      .map((value) => String(value).trim())
+      .find(Boolean) || "",
   }));
 
   return {
@@ -114,12 +124,12 @@ export async function getUserExpenses(userId, page = 1) {
   };
 }
 
-// Preserve full-dataset filtering/export until filter RPC inputs are available.
-export async function getAllUserExpenses(userId) {
-  const first = await getUserExpenses(userId, 1);
+// Fetch all search matches for local filters and CSV export.
+export async function getAllUserExpenses(userId, search = "") {
+  const first = await getUserExpenses(userId, 1, search);
   const expenses = [...first.expenses];
   for (let page = 2; page <= first.total_pages; page += 1) {
-    const result = await getUserExpenses(userId, page);
+    const result = await getUserExpenses(userId, page, search);
     expenses.push(...result.expenses);
   }
   return { ...first, expenses };

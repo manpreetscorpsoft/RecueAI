@@ -28,11 +28,11 @@ function DashboardPage() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const localFiltering = Boolean(
-    filters.search.trim() || filters.category !== "all" ||
+    filters.category !== "all" ||
     filters.fromDate || filters.toDate || filters.sortDate || filters.sortPrice,
   );
   const { hasLoaded, expenses, metadata, loading: expensesLoading, error: expensesError, loadExpenses } =
-    useExpensePages(userId, currentPage, setCurrentPage, localFiltering, "dashboard.unableToLoadExpenses");
+    useExpensePages(userId, currentPage, setCurrentPage, localFiltering, "dashboard.unableToLoadExpenses", filters.search);
 
   const [accountData, setAccountData] = useState(null);
   const [expenseToDelete, setExpenseToDelete] = useState(null);
@@ -227,8 +227,8 @@ function DashboardPage() {
     if (!localFiltering) return expenses;
     let result = [...expenses];
 
-    // Search supplier and category
-    result = result.filter(createExpenseMatcher(filters, t));
+    // Filter category locally; search is applied by the backend.
+    result = result.filter(createExpenseMatcher({ ...filters, search: "" }, t));
 
     if (filters.fromDate) {
       result = result.filter(

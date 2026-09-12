@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAllUserExpenses, getUserExpenses } from "../services/expenseService";
 
-export default function useExpensePages(userId, currentPage, setCurrentPage, localFiltering, errorKey) {
+export default function useExpensePages(userId, currentPage, setCurrentPage, localFiltering, errorKey, search = "") {
   const [data, setData] = useState({ expenses: [], total_expense: 0, total_pages: 1, page_size: 10 });
   const [hasLoaded, setHasLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -11,7 +11,8 @@ export default function useExpensePages(userId, currentPage, setCurrentPage, loc
   // Local filtering paginates the complete dataset without refetching each page.
   const requestedPage = localFiltering ? 1 : currentPage;
 
-  const requestKey = `${userId}:${requestedPage}:${localFiltering}`;
+  const searchValue = search.trim();
+  const requestKey = JSON.stringify([userId, requestedPage, localFiltering, searchValue]);
 
   const loadExpenses = useCallback(async () => {
     const id = ++requestId.current;
@@ -19,8 +20,8 @@ export default function useExpensePages(userId, currentPage, setCurrentPage, loc
     setError("");
     try {
       const result = localFiltering
-        ? await getAllUserExpenses(userId)
-        : await getUserExpenses(userId, requestedPage);
+        ? await getAllUserExpenses(userId, searchValue)
+        : await getUserExpenses(userId, requestedPage, searchValue);
       if (id !== requestId.current) return;
       const lastPage = Math.max(1, result.total_pages);
       if (!localFiltering && requestedPage > lastPage) {
@@ -39,16 +40,16 @@ export default function useExpensePages(userId, currentPage, setCurrentPage, loc
         setLoading(false);
       }
     }
-  }, [userId, requestedPage, localFiltering, setCurrentPage, errorKey, requestKey]);
+  }, [userId, requestedPage, localFiltering, setCurrentPage, errorKey, requestKey, searchValue]);
 
   useEffect(() => {
     // Schedule the fetch and invalidate responses after navigation/unmount.
-    const timer = setTimeout(() => { void loadExpenses(); }, 0);
+    const timer = setTimeout(() => { void loadExpenses(); }, searchValue ? 300 : 0);
     return () => {
       clearTimeout(timer);
       requestId.current += 1;
     };
-  }, [loadExpenses]);
+  }, [loadExpenses, searchValue]);
 
   return { hasLoaded, expenses: data.expenses, metadata: data, loading: loading || settledRequest !== requestKey, error, loadExpenses };
 }

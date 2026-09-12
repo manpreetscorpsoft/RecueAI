@@ -108,7 +108,7 @@ function ExpenseList({
   );
 
   return (
-    <div className="relative" aria-busy={loading}>
+    <div className="relative min-w-0" aria-busy={loading}>
       {loading && (
         <>
           <div className="absolute inset-x-0 top-0 z-10 h-0.5 animate-pulse rounded-full bg-[#d5af42]" />
@@ -133,7 +133,8 @@ function ExpenseList({
           
         "
       >
-        <table className="w-full table-fixed border-collapse">
+        <div className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-[#d5af42]" role="region" aria-label={t("navigation.expenses")} tabIndex={0}>
+        <table className="w-full min-w-[1180px] table-fixed border-collapse">
           {/* =========================
               TABLE HEADING
           ========================== */}
@@ -150,7 +151,7 @@ function ExpenseList({
               "
             >
               {/* Submission Date */}
-              <th className="w-[15%] px-5">
+              <th className="w-[14%] px-5">
                 {t("expenseList.submissionDate")}
               </th>
 
@@ -158,19 +159,22 @@ function ExpenseList({
               <th className="w-[11%] px-4">{t("expenseList.date")}</th>
 
               {/* Supplier */}
-              <th className="w-[22%] px-4">{t("expenseList.supplier")}</th>
+              <th className="w-[14%] px-4">{t("expenseList.supplier")}</th>
+
+              {/* Phone */}
+              <th scope="col" className="w-[15%] px-4">{t("expenseList.phone")}</th>
 
               {/* Category */}
-              <th className="w-[16%] px-4">{t("expenseList.category")}</th>
+              <th className="w-[12%] px-4">{t("expenseList.category")}</th>
 
               {/* Amount */}
-              <th className="w-[13%] px-4">{t("expenseList.amount")}</th>
+              <th className="w-[12%] px-4">{t("expenseList.amount")}</th>
 
               {/* Receipt */}
-              <th className="w-[14%] px-4">{t("expenseList.receipt")}</th>
+              <th className="w-[12%] px-4">{t("expenseList.receipt")}</th>
 
               {/* Actions */}
-              <th className="w-[9%] px-4 text-right">
+              <th className="w-[10%] px-4 text-right">
                 {t("expenseList.actions")}
               </th>
             </tr>
@@ -216,6 +220,13 @@ function ExpenseList({
                     <div className="truncate">{expense.supplier || "-"}</div>
                   </td>
 
+                  {/* Phone */}
+                  <td className="px-4 py-3 text-[13px] tabular-nums text-[#b4b6ba]">
+                    <span dir="ltr" className="block break-all leading-relaxed">
+                      {expense.phone || "-"}
+                    </span>
+                  </td>
+
                   {/* Category */}
                   <td className="px-4">
                     <span
@@ -242,6 +253,7 @@ function ExpenseList({
                   <td
                     className="
                       px-4
+                      break-words
                       font-medium
                       text-[#f5f1e9]
                     "
@@ -343,6 +355,7 @@ function ExpenseList({
             })}
           </tbody>
         </table>
+        </div>
 
         {/* =========================================
             DESKTOP PAGINATION
@@ -470,6 +483,8 @@ function ExpenseList({
                   className={`
                     inline-flex
                     max-w-[145px]
+                    min-w-0
+                    break-words
                     rounded-[5px]
                     border
                     px-1 sm:px-2
@@ -492,9 +507,11 @@ function ExpenseList({
                 className="
                   mt-3
                   flex
-                  items-center
+                  flex-wrap
+                  items-baseline
                   justify-between
-                  gap-4
+                  gap-x-4
+                  gap-y-1
                 "
               >
                 <h3
@@ -511,7 +528,9 @@ function ExpenseList({
 
                 <span
                   className="
-                    shrink-0
+                    min-w-0
+                    max-w-full
+                    break-all
                     text-[14px]
                     font-medium
                     text-[#d5af42]
@@ -549,6 +568,15 @@ function ExpenseList({
                   "
                 >
                   {expense.submissionDate || "-"}
+                </span>
+              </div>
+
+              <div className="mt-3 min-w-0">
+                <span className="block text-[10px] uppercase tracking-wide text-[#85888e]">
+                  {t("expenseList.phone")}
+                </span>
+                <span dir="ltr" className="mt-1 block break-all text-[13px] leading-relaxed tabular-nums text-[#c3c5c8]">
+                  {expense.phone || "-"}
                 </span>
               </div>
 

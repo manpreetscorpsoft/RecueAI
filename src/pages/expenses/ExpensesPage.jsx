@@ -36,11 +36,11 @@ function ExpensesPage() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const localFiltering = Boolean(
-    filters.search.trim() || filters.category !== "all" ||
+    filters.category !== "all" ||
     filters.fromDate || filters.toDate || filters.sortDate || filters.sortPrice,
   );
   const { hasLoaded, expenses, metadata, loading, error, loadExpenses } =
-    useExpensePages(userId, currentPage, setCurrentPage, localFiltering, "expenses.loadError");
+    useExpensePages(userId, currentPage, setCurrentPage, localFiltering, "expenses.loadError", filters.search);
 
   /* =====================================================
      STATE
@@ -93,10 +93,10 @@ function ExpensesPage() {
     let result = [...expenses];
 
     // =========================
-    // SEARCH SUPPLIER AND CATEGORY
+    // CATEGORY FILTER (SEARCH IS APPLIED BY THE BACKEND)
     // =========================
 
-    result = result.filter(createExpenseMatcher(filters, t));
+    result = result.filter(createExpenseMatcher({ ...filters, search: "" }, t));
 
     if (filters.fromDate) {
       result = result.filter(
@@ -385,7 +385,7 @@ function ExpensesPage() {
 
     let exportExpenses;
     try {
-      exportExpenses = localFiltering ? filteredExpenses : (await getAllUserExpenses(userId)).expenses;
+      exportExpenses = localFiltering ? filteredExpenses : (await getAllUserExpenses(userId, filters.search)).expenses;
     } catch {
       console.error("Unable to export expenses:");
       window.alert(t("expenses.loadError"));
