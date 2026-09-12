@@ -9,14 +9,6 @@ function Sidebar({ role = "admin", onLogout }) {
   const { t } = useTranslation();
 
   /* =========================================================
-     GET USER PLAN
-  ========================================================= */
-
-  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-
-  const planId = Number(storedUser.plan_id ?? storedUser.planId ?? 0);
-
-  /* =========================================================
      MENU ITEMS
   ========================================================= */
 
@@ -120,10 +112,10 @@ function Sidebar({ role = "admin", onLogout }) {
 
   /* =========================================================
      GROUP MENU
-     ONLY PRO PLAN: plan_id = 3
+     ADMIN ONLY
   ========================================================= */
 
-  if (planId === 3) {
+  if (role === "admin") {
     menuItems.push({
       label: t("navigation.group"),
       path: "/group",

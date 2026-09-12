@@ -12,6 +12,23 @@ export function formatLoginPhone(phone, countryCode) {
 async function invokeOtp(name, body, fallback) {
   const { data, error } = await supabase.functions.invoke(name, { body });
   if (error?.context?.status === 429) throw new Error("auth.tooManyAttempts");
+  let payload = data;
+  if (error?.context && typeof error.context.clone === "function") {
+    try {
+      payload = await error.context.clone().json();
+    } catch {
+      // Non-JSON responses use the normal OTP error below.
+    }
+  }
+  if (name === "request-email-otp") {
+    const details = [payload?.code, payload?.error_code, payload?.error, payload?.message,
+      payload?.error?.code, payload?.error?.message, payload?.details,
+      payload?.error?.details, typeof payload === "string" ? payload : null];
+    const accountMissing = details.some((detail) => typeof detail === "string" &&
+      /\b(?:user|account|email|phone|phone number|number)\b.{0,40}\b(?:not found|not registered|unregistered|does not exist|doesn't exist)\b|\bno (?:registered )?(?:user|account|email|phone)(?: address| number)? (?:found|exists)\b|\b(?:unregistered|not registered)\b.{0,40}\b(?:user|account|email|phone|number)\b/i
+        .test(detail.replace(/[_-]/g, " ")));
+    if (accountMissing) throw new Error("auth.accountNotRegistered");
+  }
   if (error || !data || data.success === false || data.error) {
     throw new Error(fallback);
   }

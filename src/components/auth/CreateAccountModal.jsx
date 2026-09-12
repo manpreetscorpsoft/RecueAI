@@ -1,6 +1,7 @@
 import logo from "../../assets/logo.png";
 
 function CreateAccountModal({
+  message,
   onClose,
   onEnglish,
   onFrench,
@@ -92,6 +93,12 @@ function CreateAccountModal({
           >
             Create Your Account
           </h2>
+
+          {message && (
+            <p role="alert" className="mx-auto mb-5 max-w-[470px] rounded-lg border border-[#D3AD48]/40 bg-[#D3AD48]/10 px-4 py-3 text-sm leading-6 text-[#D3AD48]">
+              {message}
+            </p>
+          )}
 
           <p
             className="

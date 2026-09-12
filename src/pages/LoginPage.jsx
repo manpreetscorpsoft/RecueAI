@@ -27,6 +27,7 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
+  const [createAccountMessage, setCreateAccountMessage] = useState("");
 
   const otpRefs = useRef([]);
   const busyRef = useRef(false);
@@ -45,6 +46,7 @@ function LoginPage() {
   }, [otpPhone]);
 
   const resetOtp = () => {
+    setResendSeconds(0);
     setOtpPhone("");
     setOtpBoxes(["", "", "", "", "", ""]);
     setLoginError("");
@@ -185,7 +187,14 @@ function LoginPage() {
       setResendSeconds(60);
       otpRefs.current[0]?.focus();
     } catch (error) {
-      setLoginError(error.message?.startsWith("auth.") ? error.message : "auth.sendOtpError");
+      if (error.message === "auth.accountNotRegistered") {
+        resetOtp();
+        setResendSeconds(0);
+        setCreateAccountMessage("auth.accountNotRegistered");
+        setIsCreateAccountOpen(true);
+      } else {
+        setLoginError(error.message?.startsWith("auth.") ? error.message : "auth.sendOtpError");
+      }
     } finally {
       busyRef.current = false;
       setIsLoading(false);
@@ -599,7 +608,7 @@ function LoginPage() {
           {t("auth.noAccount")}{" "}
           <button
             type="button"
-            onClick={() => setIsCreateAccountOpen(true)}
+            onClick={() => { setCreateAccountMessage(""); setIsCreateAccountOpen(true); }}
             className="font-semibold text-[#d5af42]"
           >
             {t("auth.createAccount")}
@@ -609,6 +618,7 @@ function LoginPage() {
 
       {isCreateAccountOpen && (
         <CreateAccountModal
+          message={createAccountMessage ? t(createAccountMessage) : ""}
           onClose={() => setIsCreateAccountOpen(false)}
           onEnglish={() => openWhatsAppGroup("en")}
           onFrench={() => openWhatsAppGroup("fr")}

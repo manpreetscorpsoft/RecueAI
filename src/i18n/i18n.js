@@ -5,6 +5,7 @@ const resources = {
   en: {
     translation: {
       auth: {
+        accountNotRegistered: "This email or phone number does not exist. Please create your account.",
         otpSentEmail: "An OTP has been sent to your registered email.",
         sendingOtp: "Sending code...",
         resendOtp: "RESEND CODE",
@@ -242,6 +243,7 @@ const resources = {
   fr: {
     translation: {
       auth: {
+        accountNotRegistered: "Cette adresse e-mail ou ce num\u00e9ro de t\u00e9l\u00e9phone n\u2019existe pas. Veuillez cr\u00e9er votre compte.",
         otpSentEmail: "Un code a \u00e9t\u00e9 envoy\u00e9 \u00e0 votre adresse e-mail enregistr\u00e9e.",
         sendingOtp: "Envoi du code...",
         resendOtp: "RENVOYER LE CODE",

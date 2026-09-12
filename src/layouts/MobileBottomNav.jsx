@@ -68,8 +68,8 @@ function MobileBottomNav({ role = "admin" }) {
     },
   ];
 
-  // Group is available for Member only.
-  if (role === "member") {
+  // Group is available for Admin only.
+  if (role === "admin") {
     items.push({
       label: t("navigation.group"),
       path: "/group",
