@@ -27,9 +27,10 @@ export async function getUserExpenses(userId, page = 1, search = "") {
   }
 
   // RPCs may return the JSON object directly or as a single result row.
-  const response = Array.isArray(data) && data.length === 1 && Array.isArray(data[0]?.expenses)
-    ? data[0]
-    : data;
+  const response =
+    Array.isArray(data) && data.length === 1 && Array.isArray(data[0]?.expenses)
+      ? data[0]
+      : data;
   if (response?.success === false) {
     throw new Error("Unable to load expenses");
   }
@@ -39,19 +40,27 @@ export async function getUserExpenses(userId, page = 1, search = "") {
   }
 
   const totalExpense = Number(response.total_expense);
-  if (response.total_expense == null || response.total_expense === "" ||
-      !Number.isSafeInteger(totalExpense) || totalExpense < 0) {
+  if (
+    response.total_expense == null ||
+    response.total_expense === "" ||
+    !Number.isSafeInteger(totalExpense) ||
+    totalExpense < 0
+  ) {
     throw new Error("Invalid total expense count");
   }
+
   const reportedSize = Number(response.page_size);
-  const pageSize = Number.isSafeInteger(reportedSize) && reportedSize > 0 ? reportedSize : 10;
+  const pageSize =
+    Number.isSafeInteger(reportedSize) && reportedSize > 0 ? reportedSize : 10;
   const totalPages = Math.ceil(totalExpense / pageSize);
   const reportedPage = Number(response.page_no ?? requestedPage);
-  if (!Number.isSafeInteger(reportedPage) || reportedPage < 1 ||
-      (requestedPage <= Math.max(1, totalPages) && reportedPage !== requestedPage)) {
+  if (
+    !Number.isSafeInteger(reportedPage) ||
+    reportedPage < 1 ||
+    (requestedPage <= Math.max(1, totalPages) && reportedPage !== requestedPage)
+  ) {
     throw new Error("Expense response does not match the requested page");
   }
-
 
   const mappedExpenses = expenses.map((expense) => ({
     /* Expense ID */
@@ -105,10 +114,13 @@ export async function getUserExpenses(userId, page = 1, search = "") {
     userId: expense.user_id,
 
     /* Preserve the expense owner's phone, including country code and leading zeros. */
-    phone: [expense.phone_number, expense.phone]
-      .filter((value) => typeof value === "string" || typeof value === "number")
-      .map((value) => String(value).trim())
-      .find(Boolean) || "",
+    phone:
+      [expense.phone_number, expense.phone]
+        .filter(
+          (value) => typeof value === "string" || typeof value === "number",
+        )
+        .map((value) => String(value).trim())
+        .find(Boolean) || "",
   }));
 
   return {
@@ -243,7 +255,6 @@ export async function deleteExpense(expenseId) {
     p_expense_id: expenseId,
   });
 
-
   if (error) {
     console.error("Delete expense RPC error:");
     throw error;
@@ -295,7 +306,6 @@ export async function bulkDeleteExpenses(expenseIds) {
   const { data, error } = await supabase.rpc("svc_bulk_delete_expenses", {
     p_expense_ids: cleanExpenseIds,
   });
-
 
   if (error) {
     console.error("Bulk delete RPC error:");

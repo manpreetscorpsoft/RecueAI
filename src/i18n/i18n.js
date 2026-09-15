@@ -5,16 +5,20 @@ const resources = {
   en: {
     translation: {
       auth: {
-        accountNotRegistered: "This email or phone number does not exist. Please create your account.",
+        accountNotRegistered:
+          "This email or phone number does not exist. Please create your account.",
         otpSentEmail: "An OTP has been sent to your registered email.",
         sendingOtp: "Sending code...",
         resendOtp: "RESEND CODE",
         resendCountdown: "Resend code in {{seconds}}s",
         verifyingOtp: "Verifying...",
-        invalidPhone: "Please enter a valid phone number with the correct country code.",
+        invalidPhone:
+          "Please enter a valid phone number with the correct country code.",
         invalidOtp: "Please enter the 6-digit code from your email.",
-        sendOtpError: "Unable to send the code. Check your phone number and try again.",
-        verifyOtpError: "Unable to verify the code. Check it or request a new code.",
+        sendOtpError:
+          "Unable to send the code. Check your phone number and try again.",
+        verifyOtpError:
+          "Unable to verify the code. Check it or request a new code.",
         sessionError: "Unable to complete sign-in. Please contact support.",
         tooManyAttempts: "Too many attempts. Please wait before trying again.",
         countryCode: "Country calling code",
@@ -43,6 +47,8 @@ const resources = {
 
       dashboard: {
         title: "Dashboard",
+        backToHomepage: "Back to home page",
+        contactUs: "Contact us",
         overview: "Overview of your RecuAI account and expenses",
         currentPlan: "Current Plan",
         expensesUsed: "Expenses Used",
@@ -85,13 +91,14 @@ const resources = {
         allCategories: "All Categories",
         fromDate: "From Date",
         toDate: "To Date",
-        sortByDate: "Sort by Date",
+        sortByDate: "Sort by Submission date",
         newestFirst: "Newest First",
         oldestFirst: "Oldest First",
         sortByPrice: "Sort by Price",
         lowToHigh: "Low to High",
         highToLow: "High to Low",
-        exportCsv: "Export CSV",
+        export: "Export Excel",
+        exporting: "Exporting...",
         bulkDelete: "Bulk Delete",
         deleteSelected: "Delete Selected ({{count}})",
         selectAll: "Select All ({{count}})",
@@ -244,18 +251,25 @@ const resources = {
   fr: {
     translation: {
       auth: {
-        accountNotRegistered: "Cette adresse e-mail ou ce num\u00e9ro de t\u00e9l\u00e9phone n\u2019existe pas. Veuillez cr\u00e9er votre compte.",
-        otpSentEmail: "Un code a \u00e9t\u00e9 envoy\u00e9 \u00e0 votre adresse e-mail enregistr\u00e9e.",
+        accountNotRegistered:
+          "Cette adresse e-mail ou ce num\u00e9ro de t\u00e9l\u00e9phone n\u2019existe pas. Veuillez cr\u00e9er votre compte.",
+        otpSentEmail:
+          "Un code a \u00e9t\u00e9 envoy\u00e9 \u00e0 votre adresse e-mail enregistr\u00e9e.",
         sendingOtp: "Envoi du code...",
         resendOtp: "RENVOYER LE CODE",
         resendCountdown: "Renvoyer le code dans {{seconds}} s",
         verifyingOtp: "V\u00e9rification...",
-        invalidPhone: "Veuillez saisir un num\u00e9ro valide avec le bon indicatif.",
+        invalidPhone:
+          "Veuillez saisir un num\u00e9ro valide avec le bon indicatif.",
         invalidOtp: "Saisissez le code \u00e0 6 chiffres re\u00e7u par e-mail.",
-        sendOtpError: "Impossible d\u2019envoyer le code. V\u00e9rifiez votre num\u00e9ro et r\u00e9essayez.",
-        verifyOtpError: "Impossible de v\u00e9rifier le code. V\u00e9rifiez-le ou demandez un nouveau code.",
-        sessionError: "Impossible de terminer la connexion. Contactez l\u2019assistance.",
-        tooManyAttempts: "Trop de tentatives. Veuillez patienter avant de r\u00e9essayer.",
+        sendOtpError:
+          "Impossible d\u2019envoyer le code. V\u00e9rifiez votre num\u00e9ro et r\u00e9essayez.",
+        verifyOtpError:
+          "Impossible de v\u00e9rifier le code. V\u00e9rifiez-le ou demandez un nouveau code.",
+        sessionError:
+          "Impossible de terminer la connexion. Contactez l\u2019assistance.",
+        tooManyAttempts:
+          "Trop de tentatives. Veuillez patienter avant de r\u00e9essayer.",
         countryCode: "Indicatif t\u00e9l\u00e9phonique",
         otpDigit: "Chiffre {{digit}} du code de v\u00e9rification",
 
@@ -283,6 +297,8 @@ const resources = {
 
       dashboard: {
         title: "Tableau de bord",
+        backToHomepage: "Retour \u00e0 l'accueil",
+        contactUs: "Contactez-nous",
         overview: "Aperçu de votre compte RecuAI et de vos dépenses",
         currentPlan: "Forfait actuel",
         expensesUsed: "Dépenses utilisées",
@@ -325,13 +341,14 @@ const resources = {
         allCategories: "Toutes les catégories",
         fromDate: "Date de début",
         toDate: "Date de fin",
-        sortByDate: "Trier par date",
+        sortByDate: "Trier par date de soumission",
         newestFirst: "Plus récentes d'abord",
         oldestFirst: "Plus anciennes d'abord",
         sortByPrice: "Trier par montant",
         lowToHigh: "Du plus bas au plus élevé",
         highToLow: "Du plus élevé au plus bas",
-        exportCsv: "Exporter CSV",
+        export: "Exporter Excel",
+        exporting: "Exportation...",
         bulkDelete: "Suppression groupée",
         deleteSelected: "Supprimer la sélection ({{count}})",
         selectAll: "Tout sélectionner ({{count}})",

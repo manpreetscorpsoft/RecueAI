@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { translateExpenseCategory } from "../../../data/expenseCategories";
 
@@ -520,16 +521,21 @@ function PriceSortField({ value, onChange }) {
 }
 
 /* =========================================================
-   EXPORT CSV
+   EXPORT EXCEL
 ========================================================= */
 
 function ExportButton({ onExport }) {
   const { t } = useTranslation();
+  const [exporting, setExporting] = useState(false);
 
   return (
     <button
       type="button"
-      onClick={onExport}
+      disabled={exporting}
+      onClick={async () => {
+        setExporting(true);
+        try { await onExport(); } finally { setExporting(false); }
+      }}
       className="
         flex
         h-[44px]
@@ -563,7 +569,7 @@ function ExportButton({ onExport }) {
         <path d="M5 18v2h14v-2" strokeLinecap="round" />
       </svg>
 
-      <span>{t("filters.exportCsv")}</span>
+      <span>{t(exporting ? "filters.exporting" : "filters.export")}</span>
     </button>
   );
 }

@@ -1,3 +1,4 @@
+import { createExpenseExport } from "../../utils/expenseExport";
 import { createExpenseMatcher } from "../../data/expenseCategories";
 import useExpensePages from "../../hooks/useExpensePages";
 import { useEffect, useMemo, useState } from "react";
@@ -153,13 +154,13 @@ function ExpensesPage() {
 
     if (filters.sortDate === "newest") {
       result.sort(
-        (a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate),
+        (a, b) => new Date(b.submissionDateRaw) - new Date(a.submissionDateRaw),
       );
     }
 
     if (filters.sortDate === "oldest") {
       result.sort(
-        (a, b) => new Date(a.purchaseDate) - new Date(b.purchaseDate),
+        (a, b) => new Date(a.submissionDateRaw) - new Date(b.submissionDateRaw),
       );
     }
 
@@ -375,97 +376,29 @@ function ExpensesPage() {
   };
 
   /* =====================================================
-     EXPORT CSV
+     EXPORT EXCEL
   ===================================================== */
 
-  const handleExportCsv = async () => {
-    if (filteredExpenses.length === 0) {
-      return;
-    }
+  const handleExport = async () => {
+    if (filteredExpenses.length === 0) return;
 
-    let exportExpenses;
     try {
-      exportExpenses = localFiltering ? filteredExpenses : (await getAllUserExpenses(userId, filters.search)).expenses;
+      const exportExpenses = localFiltering
+        ? filteredExpenses
+        : (await getAllUserExpenses(userId, filters.search)).expenses;
+      const blob = await createExpenseExport(exportExpenses);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `expenses_${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
       console.error("Unable to export expenses:");
       window.alert(t("expenses.loadError"));
-      return;
     }
-
-    const headers = [
-      "Date",
-      "Supplier",
-      "Category",
-      "Amount",
-      "Currency",
-      "Description",
-      "Receipt URL",
-    ];
-
-    const rows = exportExpenses.map((expense) => [
-      expense.purchaseDate || "",
-
-      expense.supplier || "",
-
-      expense.category || "",
-
-      expense.rawAmount ?? "",
-
-      expense.currencySign || "",
-
-      expense.description || "",
-
-      expense.receiptUrl
-        ? `=HYPERLINK("${String(expense.receiptUrl).replace(
-            /"/g,
-            '""',
-          )}","View receipt")`
-        : "",
-    ]);
-
-    const escapeCsvValue = (value, allowFormula = false) => {
-      let text = String(value ?? "");
-
-      // Prevent spreadsheet formula execution
-      if (!allowFormula && /^[=+@]/.test(text)) {
-        text = `'${text}`;
-      }
-
-      text = text.replace(/"/g, '""');
-
-      return `"${text}"`;
-    };
-
-    const csvContent = [
-      headers.map(escapeCsvValue).join(","),
-
-      ...rows.map((row) =>
-        row.map((value, index) => escapeCsvValue(value, index === 6)).join(","),
-      ),
-    ].join("\n");
-
-    // UTF-8 BOM helps Excel display special characters correctly
-    const blob = new Blob(["\uFEFF", csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    const today = new Date().toISOString().split("T")[0];
-
-    link.href = url;
-
-    link.download = `expenses_${today}.csv`;
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
   };
 
   /* =====================================================
@@ -559,7 +492,7 @@ function ExpensesPage() {
           filters={filters}
           categories={categories}
           onFilterChange={handleFilterChange}
-          onExport={handleExportCsv}
+          onExport={handleExport}
           bulkDeleteMode={bulkDeleteMode}
           onToggleBulkDelete={handleToggleBulkDelete}
           selectedCount={selectedExpenseIds.length}

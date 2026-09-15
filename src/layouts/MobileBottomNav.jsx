@@ -106,10 +106,8 @@ function MobileBottomNav({ role = "admin" }) {
   return (
     <nav
       className="
-        fixed
-        bottom-0
-        left-0
-        right-0
+        shrink-0
+        w-full
         z-50
         border-t
         border-[#393c40]
@@ -144,6 +142,8 @@ function MobileBottomNav({ role = "admin" }) {
               className={`
               flex
               min-h-[58px]
+              min-w-0
+              px-1
               flex-col
               items-center
               justify-center
@@ -155,7 +155,7 @@ function MobileBottomNav({ role = "admin" }) {
             >
               <span>{item.icon}</span>
 
-              <span>{item.label}</span>
+              <span className="max-w-full text-center leading-tight [overflow-wrap:anywhere]">{item.label}</span>
             </button>
           );
         })}

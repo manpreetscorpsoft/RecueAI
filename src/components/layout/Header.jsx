@@ -21,7 +21,8 @@ function Header({
       <header
         className="
           flex
-          h-[72px]
+          min-h-[72px]
+          shrink-0
           w-full
           items-center
           justify-between
@@ -34,14 +35,14 @@ function Header({
         "
       >
         {/* Logo and wordmark */}
-        <div className="flex min-w-0 shrink-0 items-center gap-2">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           <img
             src={recuai}
             alt="Ivory Nexus Solutions"
             className="
               h-[42px]
               w-auto
-              max-w-[100px]
+              max-w-[72px] min-[375px]:max-w-[100px]
               shrink-0
               object-contain
 
@@ -50,7 +51,7 @@ function Header({
             "
           />
 
-          <span className="shrink-0 text-[20px] font-semibold text-[#d4ad3f] sm:text-[22px]">
+          <span className="shrink-0 text-[18px] min-[375px]:text-[20px] font-semibold text-[#d4ad3f] sm:text-[22px]">
             RecuAi
           </span>
         </div>
@@ -60,7 +61,8 @@ function Header({
           type="button"
           onClick={onLogout}
           className="
-            ml-3
+            ml-2
+            min-h-11
             flex
             shrink-0
             items-center
@@ -100,7 +102,8 @@ function Header({
       <header
         className="
           hidden
-          h-[72px]
+          min-h-[72px]
+          shrink-0
           w-full
           min-w-0
           items-center

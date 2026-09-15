@@ -1,3 +1,4 @@
+import DashboardContact from "../../components/layout/DashboardContact";
 import { createExpenseMatcher } from "../../data/expenseCategories";
 import useExpensePages from "../../hooks/useExpensePages";
 import DashboardLayout from "../../layouts/DashboardLayout";
@@ -277,14 +278,14 @@ function DashboardPage() {
     // Newest first
     if (filters.sortDate === "newest") {
       result.sort(
-        (a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate),
+        (a, b) => new Date(b.submissionDateRaw) - new Date(a.submissionDateRaw),
       );
     }
 
     // Oldest first
     if (filters.sortDate === "oldest") {
       result.sort(
-        (a, b) => new Date(a.purchaseDate) - new Date(b.purchaseDate),
+        (a, b) => new Date(a.submissionDateRaw) - new Date(b.submissionDateRaw),
       );
     }
 
@@ -331,7 +332,7 @@ function DashboardPage() {
   };
 
   return (
-    <DashboardLayout role={layoutRole} phone={accountData?.phone || ""}>
+    <DashboardLayout role={layoutRole} phone={accountData?.phone || ""} footer={<DashboardContact />}>
       {/* Page Heading */}
       <div>
         <h1
@@ -363,7 +364,7 @@ function DashboardPage() {
 
       {/* =========================
           STAT CARDS
-      ========================== */}
+       */}
       <div
         className="
           mt-6
@@ -372,7 +373,6 @@ function DashboardPage() {
           gap-3
 
           sm:gap-4
-
           lg:mt-7
           lg:grid-cols-4
           lg:gap-5

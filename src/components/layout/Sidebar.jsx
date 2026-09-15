@@ -272,6 +272,17 @@ function Sidebar({ role = "admin", onLogout }) {
           <span>{t("navigation.logout")}</span>
         </button>
       </nav>
+      <div className="mt-auto px-4 pb-5 pt-8">
+        <a
+          href="http://ivnexus.com/"
+          className="flex min-h-11 items-center gap-3 rounded-[10px] border border-[#403a28] px-4 py-3 text-[13px] text-[#d5af42] transition-colors hover:bg-[#20252c] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d5af42]"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5 shrink-0">
+            <path d="m12 5-7 7 7 7M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span>{t("dashboard.backToHomepage")}</span>
+        </a>
+      </div>
     </aside>
   );
 }

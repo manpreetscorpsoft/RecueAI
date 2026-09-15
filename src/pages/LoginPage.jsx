@@ -114,6 +114,14 @@ function LoginPage() {
       name: "DR Congo",
     },
     {
+      code: "+244",
+      name: "Angola",
+    },
+    {
+      code: "+258",
+      name: "Mozambique",
+    },
+    {
       code: "+212",
       name: "Morocco",
     },
@@ -247,13 +255,13 @@ function LoginPage() {
           lg:max-w-[520px]
 
           [@media(max-height:800px)]:max-w-[470px]
-          [@media(max-height:800px)]:px-8
+          sm:[@media(max-height:800px)]:px-8
           [@media(max-height:800px)]:py-5
         "
       >
         {/* Logo */}
 
-        <div className="flex flex items-center gap-3 justify-center">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 justify-center sm:gap-3">
           <img
             src={recuai}
             alt="Ivory Nexus Solutions"
@@ -479,7 +487,7 @@ function LoginPage() {
             {t("auth.enterOtp")}
           </label>
 
-          <div className="grid grid-cols-6 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-6 gap-1.5 min-[375px]:gap-2.5 sm:gap-3">
             {otpBoxes.map((value, index) => (
               <input
                 key={index}
@@ -614,6 +622,12 @@ function LoginPage() {
             {t("auth.createAccount")}
           </button>
         </p>
+        <a
+          href="http://ivnexus.com/"
+          className="mt-4 flex min-h-11 items-center justify-center rounded text-[13px] text-[#d5af42] transition-colors hover:text-[#f5f0e8] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d5af42] sm:text-[14px]"
+        >
+          {t("dashboard.backToHomepage")}
+        </a>
       </section>
 
       {isCreateAccountOpen && (
