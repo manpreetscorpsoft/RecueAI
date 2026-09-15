@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { formatLoginPhone, requestEmailOtp, verifyEmailOtp } from "../services/authService";
 import CreateAccountModal from "../components/auth/CreateAccountModal";
+import DashboardContact from "../components/layout/DashboardContact";
 
 function LoginPage() {
   const { t } = useTranslation();
@@ -628,6 +629,9 @@ function LoginPage() {
         >
           {t("dashboard.backToHomepage")}
         </a>
+        <div className="mt-4">
+          <DashboardContact showHomeLink={false} />
+        </div>
       </section>
 
       {isCreateAccountOpen && (

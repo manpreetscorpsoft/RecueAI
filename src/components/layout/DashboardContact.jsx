@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-export default function DashboardContact() {
+export default function DashboardContact({ showHomeLink = true }) {
   const { t } = useTranslation();
   const linkClass = "inline-flex min-h-11 min-w-0 max-w-full px-2 py-2 text-center [overflow-wrap:anywhere] items-center justify-center gap-2 rounded text-[13px] text-[#999ca1] transition-colors hover:text-[#d5af42] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d5af42]";
 
@@ -25,9 +25,11 @@ export default function DashboardContact() {
           </a>
         </address>
       </div>
+      {showHomeLink && (
       <a href="http://ivnexus.com/" className={`${linkClass} mt-3 w-full border-t border-[#2b3036] pt-3 text-[#d5af42] lg:hidden`}>
         {t("dashboard.backToHomepage")}
       </a>
+      )}
     </footer>
   );
 }
