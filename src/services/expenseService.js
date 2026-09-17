@@ -200,6 +200,24 @@ function formatExpenseAmount(amount, currencySign) {
   return formattedAmount;
 }
 
+/* =========================================================
+   GET CURRENCIES
+========================================================= */
+
+export async function getCurrencies(search = "") {
+  const { data, error } = await supabase.rpc("svc_get_currencies", {
+    p_search: search,
+  });
+
+  if (error) {
+    console.error("Get currencies error:", error);
+
+    throw error;
+  }
+
+  return data;
+}
+
 /* ========================================================= 
    UPDATE EXPENSE 
 ========================================================= */
