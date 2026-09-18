@@ -47,23 +47,35 @@ function DashboardPage() {
   const dashboardData = useMemo(() => {
     const expenseLimit = accountData?.expenseLimit ?? 0;
     const expensesUsed = accountData?.expensesUsed ?? 0;
-    const totalExpenses = Number(metadata.total_amount ?? expenses.reduce(
-      (total, expense) => total + Number(expense.rawAmount || 0),
-      0,
-    ));
-    const percentageUsed = expenseLimit
-      ? Math.min(100, Math.round((expensesUsed / expenseLimit) * 100))
-      : 0;
-    const firstExpense = expenses.find(
-      (expense) => expense.currencySign || expense.currency,
-    );
+    // const totalExpenses = Number(metadata.total_amount ?? expenses.reduce(
+    //   (total, expense) => total + Number(expense.rawAmount || 0),
+    //   0,
+    // ));
+    // const percentageUsed = expenseLimit
+    //   ? Math.min(100, Math.round((expensesUsed / expenseLimit) * 100))
+    //   : 0;
+    // const firstExpense = expenses.find(
+    //   (expense) => expense.currencySign || expense.currency,
+    // );
+
+    const totalExpenses = Number(
+  accountData?.totalConvertedAmount ?? 0
+);
+
+const currencySign =
+  accountData?.defaultCurrencySign || "";
+
+const percentageUsed = expenseLimit
+  ? Math.min(100, Math.round((expensesUsed / expenseLimit) * 100))
+  : 0;
 
     return {
       currentPlan: accountData?.currentPlan || "-",
       expensesUsed,
       expenseLimit,
       totalExpenses,
-      currencySign: firstExpense?.currencySign || accountData?.currency || "",
+      // currencySign: firstExpense?.currencySign || accountData?.currency || "",
+      currencySign,
       subscriptionStatus: accountData?.subscriptionStatus || "-",
       planExpiry: accountData?.planExpires || "-",
       percentageUsed,
@@ -157,6 +169,16 @@ function DashboardPage() {
         planExpires: formatAccountDate(data.user.plan_expires_at),
         currency: cleanText(data.user.currency),
         subscriptionStatus: cleanText(data.user.subscription_status),
+
+          // NEW
+        defaultCurrencySign: cleanText(
+          data.user.default_currency_sign
+        ),
+
+        // NEW
+        totalConvertedAmount: Number(
+          data.user.total_converted_amount ?? 0
+        ),
 
         layoutRole:
           isGroupAccount && groupRole === "member" ? "member" : "admin",
@@ -365,6 +387,7 @@ function DashboardPage() {
       {/* =========================
           STAT CARDS
        */}
+       {/* {JSON.stringify(dashboardData)} */}
       <div
         className="
           mt-6
@@ -383,7 +406,10 @@ function DashboardPage() {
             Desktop order: 1
             Mobile order: 2
         */}
+        
         <div className="order-2 lg:order-1">
+
+          
           <StatCard
             title={t("dashboard.currentPlan")}
             value={

@@ -309,11 +309,16 @@ function EditExpenseModal({
 
         <form
           onSubmit={handleSubmit}
-          className="mt-7"
+          className="mt-5
+          grid
+          grid-cols-[minmax(0,1fr)_minmax(0,1fr)]
+          gap-x-[10px]
+          gap-y-0
+          "
         >
           {/* Supplier */}
-
-          <FormLabel>
+          <div className="mt-5 col-start-1 col-end-3">
+                <FormLabel>
             {t("editExpense.supplier")}
           </FormLabel>
 
@@ -324,6 +329,9 @@ function EditExpenseModal({
             type="text"
             className={inputClass}
           />
+
+          </div>
+          
 
           {/* Category */}
 
@@ -387,7 +395,7 @@ function EditExpenseModal({
 
           <div className="mt-5">
             <FormLabel>
-              Currency
+              Curre{t("editExpense.currency")}
             </FormLabel>
 
             <div className="relative">
@@ -443,15 +451,15 @@ function EditExpenseModal({
                 {/* Currency code */}
 
                 <span className="mr-3 text-[14px] font-semibold text-[#f5f0e8]">
-                  {form.currency || "Select"}
+                  {form.currency || t("editExpense.selectCurrency")}
                 </span>
 
                 {/* Text */}
 
                 <span className="min-w-0 flex-1 truncate text-[13px] text-[#999ca1]">
                   {form.currency
-                    ? "Change currency"
-                    : "Select currency"}
+                    ? t("editExpense.changeCurrency")
+                    : t("editExpense.selectCurrency")}
                 </span>
 
                 {/* Arrow */}
@@ -545,7 +553,7 @@ function EditExpenseModal({
                             event.target.value,
                           )
                         }
-                        placeholder="Search country or currency code"
+                        placeholder={t("editExpense.searchCurrencyPlaceholder")}
                         autoFocus
                         className="
                           h-[42px]
@@ -573,7 +581,7 @@ function EditExpenseModal({
                   <div className="max-h-[220px] overflow-y-auto">
                     {currencyLoading ? (
                       <div className="px-4 py-5 text-center text-[12px] text-[#777b80]">
-                        Loading currencies...
+                        {t("editExpense.loadingCurrencies")}
                       </div>
                     ) : currencies.length > 0 ? (
                       currencies.map(
@@ -691,7 +699,7 @@ function EditExpenseModal({
                       )
                     ) : (
                       <div className="px-4 py-5 text-center text-[12px] text-[#777b80]">
-                        No currency found
+                        {t("editExpense.noCurrencyFound")}
                       </div>
                     )}
                   </div>
@@ -753,7 +761,7 @@ function EditExpenseModal({
 
           {/* Description */}
 
-          <div className="mt-5">
+          <div className="mt-5 col-start-1 col-end-3">
             <FormLabel>
               {t("editExpense.description")}
             </FormLabel>
@@ -769,7 +777,7 @@ function EditExpenseModal({
 
           {/* Purchase Date */}
 
-          <div className="mt-5">
+          <div className="mt-5 row-start-2 row-end-3 col-start-2 col-end-3">
             <FormLabel>
               {t("editExpense.purchaseDate")}
             </FormLabel>
@@ -828,6 +836,8 @@ function EditExpenseModal({
               gap-3
 
               lg:flex-row-reverse
+              col-start-1
+              col-end-3
             "
           >
             <button
