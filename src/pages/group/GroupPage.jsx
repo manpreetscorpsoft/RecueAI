@@ -63,34 +63,65 @@ function GroupPage() {
         // Group information
         // =========================================
 
+        // setGroupData({
+        //   groupName: cleanText(group.group_name) || "-",
+
+        //   yourRole: cleanText(groupRole),
+
+        //   groupPlan: cleanText(data.user?.plan_name) || "-",
+
+        //   groupStatus: cleanText(group.group_status) || "-",
+
+        //   members: isGroupAdmin
+        //     ? groupMembers.length
+        //     : (group.members?.length ?? 0),
+
+        //   groupExpenseUsage: `${
+        //     group.used_limit ?? data.user?.used_limit ?? 0
+        //   } / ${group.monthly_limit ?? data.user?.total_expense_limit ?? 0}`,
+
+        //   expensesRemaining:
+        //     group.remaining_limit ?? data.user?.remaining_limit ?? 0,
+
+        //   planExpires: formatAccountDate(data.user?.plan_expires_at),
+
+        //   phone: cleanText(data.user?.phone),
+
+        //   role: isGroupAdmin ? "admin" : "member",
+
+        //   isGroupAdmin,
+        // });
+
         setGroupData({
-          groupName: cleanText(group.group_name) || "-",
+  groupName: cleanText(group.group_name) || "-",
 
-          yourRole: cleanText(groupRole),
+  yourRole: cleanText(groupRole),
 
-          groupPlan: cleanText(data.user?.plan_name) || "-",
+  groupPlan: cleanText(data.user?.plan_name) || "-",
 
-          groupStatus: cleanText(group.group_status) || "-",
+  planId: Number(data.user?.plan_id || 0),
 
-          members: isGroupAdmin
-            ? groupMembers.length
-            : (group.members?.length ?? 0),
+  groupStatus: cleanText(group.group_status) || "-",
 
-          groupExpenseUsage: `${
-            group.used_limit ?? data.user?.used_limit ?? 0
-          } / ${group.monthly_limit ?? data.user?.total_expense_limit ?? 0}`,
+  members: isGroupAdmin
+    ? groupMembers.length
+    : (group.members?.length ?? 0),
 
-          expensesRemaining:
-            group.remaining_limit ?? data.user?.remaining_limit ?? 0,
+  groupExpenseUsage: `${
+    group.used_limit ?? data.user?.used_limit ?? 0
+  } / ${group.monthly_limit ?? data.user?.total_expense_limit ?? 0}`,
 
-          planExpires: formatAccountDate(data.user?.plan_expires_at),
+  expensesRemaining:
+    group.remaining_limit ?? data.user?.remaining_limit ?? 0,
 
-          phone: cleanText(data.user?.phone),
+  planExpires: formatAccountDate(data.user?.plan_expires_at),
 
-          role: isGroupAdmin ? "admin" : "member",
+  phone: cleanText(data.user?.phone),
 
-          isGroupAdmin,
-        });
+  role: isGroupAdmin ? "admin" : "member",
+
+  isGroupAdmin,
+});
 
         // =========================================
         // Members
@@ -270,7 +301,7 @@ function GroupPage() {
           GROUP ADMIN ONLY
       ====================================================== */}
 
-      {groupData.isGroupAdmin && (
+      {groupData.planId === 3 && groupData.isGroupAdmin && (
         <section className="mt-7 lg:mt-16">
           {/* Heading */}
 
@@ -334,19 +365,35 @@ function GroupPage() {
                   "
                 >
                   {/* Join Date */}
-                  <th className="w-[18%] px-6"> Join Date</th>
+                    
+                        <th className="w-[15%] px-6">
+                          Join Date
+                        </th>
 
-                  {/* Phone */}
-                  <th className="w-[27%] px-4">Member&apos;s Phone No.</th>
+                        {/* User ID */}
+                        <th className="w-[12%] px-4">
+                          User ID
+                        </th>
 
-                  {/* Role */}
-                  <th className="w-[17%] px-4">{t("group.role")}</th>
+                        {/* Phone */}
+                        <th className="w-[23%] px-4">
+                          Member&apos;s Phone No.
+                        </th>
 
-                  {/* Last Expense Date */}
-                  <th className="w-[21%] px-4">Last Expense Date</th>
+                        {/* Role */}
+                        <th className="w-[14%] px-4">
+                          {t("group.role")}
+                        </th>
 
-                  {/* Status */}
-                  <th className="w-[17%] px-4">{t("group.status")}</th>
+                        {/* Last Expense Date */}
+                        <th className="w-[20%] px-4">
+                          Last Expense Date
+                        </th>
+
+                        {/* Status */}
+                        <th className="w-[16%] px-4">
+                          {t("group.status")}
+                        </th>
                 </tr>
               </thead>
 
@@ -370,6 +417,13 @@ function GroupPage() {
                     <td className="px-6 text-[#9a9da2]">
                       {member.date || "-"}
                     </td>
+
+                    {/* User ID */}
+
+                      <td className="px-4 font-medium text-[#d5af42]">
+                        {member.userId || "-"}
+                      </td>
+
 
                     {/* Member Phone */}
 
@@ -644,34 +698,44 @@ function GroupPage() {
 
 function mapMember(member, index) {
   const rawStatus = cleanText(
-    member.membership_status || member.status || "active",
+    member.membership_status || member.status || "active"
   ).toLowerCase();
 
-  const displayStatus = rawStatus === "active" ? "active" : "inactive";
+  const displayStatus =
+    rawStatus === "active" ? "active" : "inactive";
 
   return {
-    /* Member ID */
+    /* Row ID */
     id: member.id || member.user_id || member.member_id || index,
+
+    /* Actual User ID */
+    userId: member.user_id || "-",
 
     /* Member Join Date */
     date: formatAccountDate(
       member.date_of_join ||
         member.created_at ||
         member.joined_at ||
-        member.date,
+        member.date
     ),
 
     /* Member Phone Number */
     whatsapp:
-      cleanText(member.phone_number || member.phone || member.whatsapp) || "-",
+      cleanText(
+        member.phone_number ||
+          member.phone ||
+          member.whatsapp
+      ) || "-",
 
     /* Member Role */
-    role: cleanText(member.member_type || member.role) || "-",
+    role: cleanText(
+      member.member_type || member.role
+    ) || "-",
 
-    /* Last Expense / Last Use Date */
+    /* Last Expense Date */
     lastExpenseDate: formatAccountDate(member.last_use),
 
-    /* Only Active / Inactive shown in dashboard */
+    /* Status */
     status: displayStatus,
   };
 }

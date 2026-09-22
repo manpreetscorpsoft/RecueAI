@@ -467,10 +467,47 @@ const percentageUsed = expenseLimit
         {/* Total Expenses */}
         <div className="order-3">
           <StatCard
-            title={t("dashboard.totalExpenses")}
-            value={`${dashboardData.currencySign}${dashboardData.totalExpenses.toLocaleString()}`}
-            icon={<WalletIcon />}
-          >
+  title={t("dashboard.totalExpenses")}
+  value={
+    <span className="group relative inline-block">
+      <span>
+        <span className="mr-2">{dashboardData.currencySign}</span>
+        {formatCompactAmount(dashboardData.totalExpenses)}
+      </span>
+
+      <span
+        className="
+          pointer-events-none
+          absolute
+          bottom-full
+          left-1/2
+          z-50
+          mb-2
+          -translate-x-1/2
+          whitespace-nowrap
+          rounded-md
+          border
+          border-[#3a3f46]
+          bg-[#11161c]
+          px-3
+          py-2
+          text-[12px]
+          font-medium
+          text-[#f5f0e8]
+          opacity-0
+          shadow-lg
+          transition-opacity
+          duration-150
+          group-hover:opacity-100
+        "
+      >
+        {dashboardData.currencySign} 
+        {dashboardData.totalExpenses.toLocaleString()}
+      </span>
+    </span>
+  }
+  icon={<WalletIcon />}
+  >
             <div className="flex flex-wrap items-center gap-1">
               <span className="text-[11px] font-medium text-[#3fb950] sm:text-[12px]">
                 ↗ +14.3%
@@ -611,6 +648,26 @@ const percentageUsed = expenseLimit
       )}
     </DashboardLayout>
   );
+}
+// Amount helper function
+
+function formatCompactAmount(value) {
+  const amount = Number(value || 0);
+  const absAmount = Math.abs(amount);
+
+  if (absAmount >= 1_000_000_000) {
+    return `${parseFloat((amount / 1_000_000_000).toFixed(2))}B`;
+  }
+
+  if (absAmount >= 1_000_000) {
+    return `${parseFloat((amount / 1_000_000).toFixed(2))}M`;
+  }
+
+  if (absAmount >= 1_000) {
+    return `${parseFloat((amount / 1_000).toFixed(2))}K`;
+  }
+
+  return amount.toLocaleString();
 }
 
 function formatAccountDate(date) {

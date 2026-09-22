@@ -1,7 +1,7 @@
 import { supabase } from "../lib/supabase";
 
-/* ========================================================= 
-   GET USER EXPENSES 
+/* =========================================================  
+   GET USER EXPENSES  
 ========================================================= */
 
 export async function getUserExpenses(userId, page = 1, search = "") {
@@ -19,6 +19,7 @@ export async function getUserExpenses(userId, page = 1, search = "") {
     p_page: requestedPage,
     p_search: search.trim(),
   };
+
   const { data, error } = await supabase.rpc("svc_get_user_expenses", params);
 
   if (error) {
@@ -31,15 +32,19 @@ export async function getUserExpenses(userId, page = 1, search = "") {
     Array.isArray(data) && data.length === 1 && Array.isArray(data[0]?.expenses)
       ? data[0]
       : data;
+
   if (response?.success === false) {
     throw new Error("Unable to load expenses");
   }
+
   const expenses = response?.expenses;
+
   if (!Array.isArray(expenses)) {
     throw new Error("Invalid expenses response");
   }
 
   const totalExpense = Number(response.total_expense);
+
   if (
     response.total_expense == null ||
     response.total_expense === "" ||
@@ -50,10 +55,14 @@ export async function getUserExpenses(userId, page = 1, search = "") {
   }
 
   const reportedSize = Number(response.page_size);
+
   const pageSize =
     Number.isSafeInteger(reportedSize) && reportedSize > 0 ? reportedSize : 10;
+
   const totalPages = Math.ceil(totalExpense / pageSize);
+
   const reportedPage = Number(response.page_no ?? requestedPage);
+
   if (
     !Number.isSafeInteger(reportedPage) ||
     reportedPage < 1 ||
@@ -69,14 +78,15 @@ export async function getUserExpenses(userId, page = 1, search = "") {
     /* Purchase Date */
     date: formatExpenseDate(expense.purchase_date),
 
-    /* 
-      Keep raw purchase date because 
-      EditExpenseModal may require YYYY-MM-DD 
+    /*  
+      Keep raw purchase date because  
+      EditExpenseModal may require YYYY-MM-DD  
     */
     purchaseDate: expense.purchase_date || "",
 
     /* Submission / Creation Date */
     submissionDate: formatExpenseDate(expense.created_at),
+
     submissionDateRaw: expense.created_at || "",
 
     /* Supplier */
@@ -139,16 +149,23 @@ export async function getUserExpenses(userId, page = 1, search = "") {
 // Fetch all search matches for local filters and CSV export.
 export async function getAllUserExpenses(userId, search = "") {
   const first = await getUserExpenses(userId, 1, search);
+
   const expenses = [...first.expenses];
+
   for (let page = 2; page <= first.total_pages; page += 1) {
     const result = await getUserExpenses(userId, page, search);
+
     expenses.push(...result.expenses);
   }
-  return { ...first, expenses };
+
+  return {
+    ...first,
+    expenses,
+  };
 }
 
-/* ========================================================= 
-   FORMAT DATE 
+/* =========================================================  
+   FORMAT DATE  
 ========================================================= */
 
 function formatExpenseDate(date) {
@@ -156,13 +173,13 @@ function formatExpenseDate(date) {
     return "-";
   }
 
-  /* 
+  /*  
     Handles:
-
+ 
     2026-09-05
-
+ 
     2026-09-05T08:25:31.123+00:00
-
+ 
     2026-09-05 08:25:31.123+00
   */
 
@@ -179,8 +196,8 @@ function formatExpenseDate(date) {
   return `${day}/${month}/${year}`;
 }
 
-/* ========================================================= 
-   FORMAT AMOUNT 
+/* =========================================================  
+   FORMAT AMOUNT  
 ========================================================= */
 
 function formatExpenseAmount(amount, currencySign) {
@@ -218,8 +235,8 @@ export async function getCurrencies(search = "") {
   return data;
 }
 
-/* ========================================================= 
-   UPDATE EXPENSE 
+/* =========================================================  
+   UPDATE EXPENSE  
 ========================================================= */
 
 export async function updateExpense({
@@ -235,33 +252,42 @@ export async function updateExpense({
     throw new Error("Expense ID is required");
   }
 
-  const { data, error } = await supabase.rpc("svc_update_expense", {
-    p_expense_id: expenseId,
+  const { data, error } = await supabase.functions.invoke(
+    "update-expense-with-conversion",
+    {
+      body: {
+        expense_id: Number(expenseId),
 
-    p_purchase_date: purchaseDate,
+        purchase_date: purchaseDate,
 
-    p_amount_fcfa: Number(amount),
+        amount_fcfa: Number(amount),
 
-    p_category: category,
+        category: category,
 
-    p_supplier: supplier,
+        supplier: supplier,
 
-    p_description: description || "",
+        description: description || "",
 
-    p_currency: currency,
-  });
+        currency: currency,
+      },
+    },
+  );
 
   if (error) {
-    console.error("Update expense error:");
+    console.error("Update expense Edge Function error:", error);
 
     throw error;
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || "Expense could not be updated");
   }
 
   return data;
 }
 
-/* ========================================================= 
-   DELETE EXPENSE 
+/* =========================================================  
+   DELETE EXPENSE  
 ========================================================= */
 
 export async function deleteExpense(expenseId) {
@@ -275,6 +301,7 @@ export async function deleteExpense(expenseId) {
 
   if (error) {
     console.error("Delete expense RPC error:");
+
     throw error;
   }
 
@@ -285,8 +312,8 @@ export async function deleteExpense(expenseId) {
   return data;
 }
 
-/* ========================================================= 
-   LOGOUT USER 
+/* =========================================================  
+   LOGOUT USER  
 ========================================================= */
 
 export async function logoutUser() {
@@ -304,6 +331,7 @@ export async function logoutUser() {
     success: true,
   };
 }
+
 /* =========================================================
    BULK DELETE EXPENSES
 ========================================================= */
@@ -327,6 +355,7 @@ export async function bulkDeleteExpenses(expenseIds) {
 
   if (error) {
     console.error("Bulk delete RPC error:");
+
     throw error;
   }
 
