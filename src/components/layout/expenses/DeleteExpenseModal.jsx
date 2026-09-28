@@ -1,6 +1,12 @@
 import { useTranslation } from "react-i18next";
 
-function DeleteExpenseModal({ expense, onClose, onConfirm, deleting = false }) {
+function DeleteExpenseModal({
+  expense,
+  onClose,
+  onConfirm,
+  deleting = false,
+  deleteError = "",
+}) {
   const { t } = useTranslation();
   if (!expense) {
     return null;
@@ -134,6 +140,12 @@ function DeleteExpenseModal({ expense, onClose, onConfirm, deleting = false }) {
         <p className="mt-4 text-[12px] leading-5 text-[#999ca1]">
           {t("deleteExpense.warning")}
         </p>
+
+        {deleteError && (
+          <p className="mt-3 text-[13px] leading-5 text-[#ff7b72]" role="alert">
+            {deleteError}
+          </p>
+        )}
 
         {/* Buttons */}
         <div

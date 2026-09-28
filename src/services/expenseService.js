@@ -306,7 +306,7 @@ export async function deleteExpense(expenseId) {
   }
 
   if (!data || data.success !== true) {
-    throw new Error("Expense was not deleted");
+    throw new Error(data?.message || "Expense was not deleted");
   }
 
   return data;

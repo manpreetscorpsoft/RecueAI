@@ -56,6 +56,7 @@ function ExpensesPage() {
   const [expenseToDelete, setExpenseToDelete] = useState(null);
 
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
@@ -410,6 +411,8 @@ function ExpensesPage() {
       return;
     }
 
+    setDeleteError("");
+
     try {
       setDeleting(true);
 
@@ -420,8 +423,13 @@ function ExpensesPage() {
       await loadExpenses();
 
       setShowDeleteSuccess(true);
-    } catch {
+    } catch (error) {
       console.error("Unable to delete expense:");
+      setDeleteError(
+        layoutRole === "member"
+          ? t("deleteExpense.onlyAdminCanDelete")
+          : error?.message || t("deleteExpense.failed"),
+      );
     } finally {
       setDeleting(false);
     }
@@ -546,6 +554,7 @@ function ExpensesPage() {
               setSelectedExpense(expense);
             }}
             onDelete={(expense) => {
+              setDeleteError("");
               setExpenseToDelete(expense);
             }}
             /* =========================
@@ -596,9 +605,11 @@ function ExpensesPage() {
         <DeleteExpenseModal
           expense={expenseToDelete}
           deleting={deleting}
+          deleteError={deleteError}
           onClose={() => {
             if (!deleting) {
               setExpenseToDelete(null);
+              setDeleteError("");
             }
           }}
           onConfirm={handleDeleteExpense}

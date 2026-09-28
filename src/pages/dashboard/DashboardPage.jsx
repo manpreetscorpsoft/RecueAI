@@ -38,6 +38,7 @@ function DashboardPage() {
   const [accountData, setAccountData] = useState(null);
   const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [updating, setUpdating] = useState(false);
@@ -220,6 +221,8 @@ const percentageUsed = expenseLimit
       return;
     }
 
+    setDeleteError("");
+
     try {
       setDeleting(true);
 
@@ -233,8 +236,13 @@ const percentageUsed = expenseLimit
 
       // Show success popup
       setShowDeleteSuccess(true);
-    } catch {
+    } catch (error) {
       console.error("Unable to delete expense:");
+      setDeleteError(
+        layoutRole === "member"
+          ? t("deleteExpense.onlyAdminCanDelete")
+          : error?.message || t("deleteExpense.failed"),
+      );
     } finally {
       setDeleting(false);
     }
@@ -601,6 +609,7 @@ const percentageUsed = expenseLimit
                   setSelectedExpense(expense);
                 }}
                 onDelete={(expense) => {
+                  setDeleteError("");
                   setExpenseToDelete(expense);
                 }}
               />
@@ -631,9 +640,11 @@ const percentageUsed = expenseLimit
         <DeleteExpenseModal
           expense={expenseToDelete}
           deleting={deleting}
+          deleteError={deleteError}
           onClose={() => {
             if (!deleting) {
               setExpenseToDelete(null);
+              setDeleteError("");
             }
           }}
           onConfirm={handleDeleteExpense}

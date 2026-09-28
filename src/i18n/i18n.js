@@ -24,7 +24,7 @@ const resources = {
         countryCode: "Country calling code",
         countrySearchPlaceholder: "Search country or code",
         noCountryFound: "No country found",
-        
+
         otpDigit: "Verification code digit {{digit}}",
 
         welcomeBack: "Welcome back",
@@ -151,6 +151,8 @@ const resources = {
         warning: "This action cannot be undone.",
         delete: "DELETE EXPENSE",
         deleting: "DELETING...",
+        onlyAdminCanDelete: "Only an admin can delete this expense.",
+        failed: "Unable to delete this expense.",
         successTitle: "Expense deleted successfully!",
         successDescription: "The expense has been removed from your account.",
       },
@@ -409,6 +411,8 @@ const resources = {
         warning: "Cette action est irréversible.",
         delete: "SUPPRIMER LA DÉPENSE",
         deleting: "SUPPRESSION...",
+        onlyAdminCanDelete: "Seul un administrateur peut supprimer cette dépense.",
+        failed: "Impossible de supprimer cette dépense.",
         successTitle: "Dépense supprimée avec succès !",
         successDescription: "La dépense a été supprimée de votre compte.",
       },
