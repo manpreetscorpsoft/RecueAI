@@ -1,6 +1,7 @@
 function BulkDeleteConfirmModal({
   count = 0,
   deleting = false,
+  deleteError = "",
   onClose,
   onConfirm,
 }) {
@@ -200,6 +201,12 @@ function BulkDeleteConfirmModal({
         >
           This action cannot be undone.
         </p>
+
+        {deleteError && (
+          <p className="mt-3 text-[13px] leading-5 text-[#ff7b72]" role="alert">
+            {deleteError}
+          </p>
+        )}
 
         {/* =====================================================
             BUTTONS

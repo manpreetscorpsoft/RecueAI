@@ -62,6 +62,7 @@ function ExpensesPage() {
 
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [bulkDeleteError, setBulkDeleteError] = useState("");
 
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
@@ -210,6 +211,7 @@ function ExpensesPage() {
       return;
     }
 
+    setBulkDeleteError("");
     setShowBulkDeleteConfirm(true);
   };
 
@@ -217,6 +219,8 @@ function ExpensesPage() {
     if (selectedExpenseIds.length === 0) {
       return;
     }
+
+    setBulkDeleteError("");
 
     try {
       setBulkDeleting(true);
@@ -238,8 +242,13 @@ function ExpensesPage() {
         // Reload latest expenses
         await loadExpenses();
       }
-    } catch {
+    } catch (error) {
       console.error("Unable to bulk delete expenses:");
+      setBulkDeleteError(
+        layoutRole === "member"
+          ? t("deleteExpense.onlyAdminCanDelete")
+          : error?.message || t("deleteExpense.failed"),
+      );
     } finally {
       setBulkDeleting(false);
     }
@@ -636,9 +645,11 @@ function ExpensesPage() {
         <BulkDeleteConfirmModal
           count={selectedExpenseIds.length}
           deleting={bulkDeleting}
+          deleteError={bulkDeleteError}
           onClose={() => {
             if (!bulkDeleting) {
               setShowBulkDeleteConfirm(false);
+              setBulkDeleteError("");
             }
           }}
           onConfirm={handleConfirmBulkDeleteExpenses}
